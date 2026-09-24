@@ -47,3 +47,4 @@ Thumbs.db
 android/
 ios/
 !apps/android/
+services/faceswap/.venv/

@@ -69,12 +69,13 @@ const children = [];
 children.push(
   run(bin("concurrently"), [
     "-n",
-    "admin,face",
+    "admin,face,faceswap",
     "-c",
-    "cyan,blue",
+    "cyan,blue,magenta",
     "--kill-others-on-fail=false",
     `pnpm --filter @donotfraud/admin dev --hostname 0.0.0.0 --port ${PORTS.admin}`,
     `uv run --directory services/face uvicorn app.main:app --host 0.0.0.0 --port ${PORTS.face} --reload`,
+    `uv run --directory services/faceswap uvicorn app.main:app --host 0.0.0.0 --port ${PORTS.faceswap} --reload`,
   ], {
     env: { ...process.env, LAN_IP: ip },
   }),

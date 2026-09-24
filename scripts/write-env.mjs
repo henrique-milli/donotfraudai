@@ -23,6 +23,7 @@ write(
 LAN_IP=${ip}
 SUPABASE_URL=${urls.supabase}
 FACE_URL=${urls.face}
+FACESWAP_URL=${urls.faceswap}
 ATTEST_API_URL=${urls.attest}
 ADMIN_URL=${urls.admin}
 SUPABASE_STUDIO_URL=${urls.studio}
@@ -38,6 +39,7 @@ NEXT_PUBLIC_ATTEST_API_URL=${urls.attest}
 );
 
 write("services/face/.env", `${banner}HOST=0.0.0.0\nPORT=${PORTS.face}\n`);
+write("services/faceswap/.env", `${banner}HOST=0.0.0.0\nPORT=${PORTS.faceswap}\n`);
 
 await import("./attest-env.mjs");
 
@@ -45,5 +47,6 @@ console.log(`LAN IP  ${ip}`);
 console.log(`Console ${urls.admin}/triage`);
 console.log(`Attest  ${urls.attest}  (edge function)`);
 console.log(`Face    ${urls.face}`);
+console.log(`Faceswap ${urls.faceswap}  (mock)`);
 console.log(`API     ${urls.supabase}`);
 console.log(`Studio  ${urls.studio}`);
