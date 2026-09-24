@@ -1,6 +1,6 @@
 # DoNotFraudAI
 
-Identity solutions for the AI fraud era.
+Neutralizing AI Fraud Era Threats.
 
 ## Core thesis
 
@@ -21,10 +21,10 @@ People who submit strong signals leave early. If the ladder is exhausted and the
 
 1. **Device.** We aggregate metrics that assess hardware reliability. That raises confidence that submitted photos and videos come from a real camera, not a compromised one.
 2. **Document photos.** The user photographs the ID. We check quality, tampering, and overall reliability, then pick one of two alternatives:
-   - **NFC chip (preferred).** If the ID has a chip, the user taps it. A valid chip proves they hold a real, untampered ID.
-   - **Document agent (fallback).** If NFC is missing or fails, an agent runs extensive online lookups to raise confidence instead.
+  - **NFC chip (preferred).** If the ID has a chip, the user taps it. A valid chip proves they hold a real, untampered ID.
+  - **Document agent (fallback).** If NFC is missing or fails, an agent runs extensive online lookups to raise confidence instead.
 3. **Face scan with randomized challenges.** The user is asked to do something that cannot be filmed in advance (**PoH**). We check:
-   - Tampering: live face-swap.
-   - Face matches the document.
-   - Biometric uniqueness: this face is not already enrolled under another identity (**PoU**).
+  - Tampering: live face-swap.
+  - Face matches the document.
+  - Biometric uniqueness: this face is not already enrolled under another identity (**PoU**).
 
