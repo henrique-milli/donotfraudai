@@ -1,5 +1,5 @@
-import { Console } from "./console";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <Console />;
+  redirect("/triage");
 }

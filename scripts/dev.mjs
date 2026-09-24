@@ -7,8 +7,6 @@ import { detectLanIp, PORTS } from "./lan.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = new Set(process.argv.slice(2));
-const tunnel = args.has("--tunnel");
-const skipMobile = args.has("--no-mobile");
 const skipSupabase = args.has("--no-supabase");
 
 function run(cmd, cmdArgs, opts = {}) {
@@ -42,7 +40,7 @@ if (!skipSupabase) {
   const docker = spawnSync("docker", ["info"], { encoding: "utf8" });
   if (docker.status !== 0) {
     console.warn(
-      "\nDocker is not running — skipping Supabase.\nStart Docker, then `pnpm supabase:start`.\nAdmin, Expo, vision, and risk will still boot.\n",
+      "\nDocker is not running — skipping Supabase.\nStart Docker, then `pnpm supabase:start`.\nThe console and the face service will still boot.\n",
     );
   } else {
     const status = spawnSync(bin("supabase"), ["status", "-o", "env"], {
@@ -71,27 +69,14 @@ const children = [];
 children.push(
   run(bin("concurrently"), [
     "-n",
-    skipMobile ? "admin,vision,risk" : "admin,mobile,vision,risk",
+    "admin,face",
     "-c",
-    skipMobile ? "cyan,magenta,yellow" : "cyan,green,magenta,yellow",
+    "cyan,blue",
     "--kill-others-on-fail=false",
     `pnpm --filter @donotfraud/admin dev --hostname 0.0.0.0 --port ${PORTS.admin}`,
-    ...(skipMobile
-      ? []
-      : [
-          tunnel
-            ? "pnpm --filter @donotfraud/mobile start -- --tunnel"
-            : "pnpm --filter @donotfraud/mobile start -- --lan",
-        ]),
-    `uv run --directory services/vision uvicorn app.main:app --host 0.0.0.0 --port ${PORTS.vision} --reload`,
-    `uv run --directory services/risk uvicorn app.main:app --host 0.0.0.0 --port ${PORTS.risk} --reload`,
+    `uv run --directory services/face uvicorn app.main:app --host 0.0.0.0 --port ${PORTS.face} --reload`,
   ], {
-    env: {
-      ...process.env,
-      LAN_IP: ip,
-      REACT_NATIVE_PACKAGER_HOSTNAME: ip,
-      EXPO_DEVTOOLS_LISTEN_ADDRESS: "0.0.0.0",
-    },
+    env: { ...process.env, LAN_IP: ip },
   }),
 );
 

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DoNotFraud console",
+  title: "DoNotFraud · fraud triage",
   description: "Human-in-the-loop review for onboarding and account recovery.",
 };
 

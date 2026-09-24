@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { PORTS } from "./lan.mjs";
 
-const ports = [PORTS.metro, PORTS.supabaseApi, PORTS.vision, PORTS.risk, PORTS.admin];
+// the Android app only talks to the attest API on local Supabase
+const ports = [PORTS.supabaseApi];
 
 const devices = spawnSync("adb", ["devices"], { encoding: "utf8" });
 if (devices.status !== 0) {
@@ -31,4 +32,4 @@ for (const port of ports) {
 
 console.log("Phone can now reach the laptop via localhost:");
 for (const port of ports) console.log(`  http://127.0.0.1:${port}`);
-console.log("\nIn the Expo app, set EXPO_PUBLIC_* URLs to 127.0.0.1 or just reload after `LAN_IP=127.0.0.1 pnpm lan`.");
+console.log("\nThe debug build of apps/android targets 127.0.0.1:54321 by default.");
