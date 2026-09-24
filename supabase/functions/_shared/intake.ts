@@ -12,7 +12,7 @@ import type { Sql } from "./db.ts";
 import { type Envelope, EnvelopeError, openEnvelope } from "./envelope.ts";
 import { explain } from "./explainer.ts";
 import * as face from "./facecheck.ts";
-import { fired, score, serverSignals, type Sig, sig } from "./risk.ts";
+import { fired, scoreWithLadder, serverSignals, type Sig, sig } from "./risk.ts";
 import { sha256Hex, unb64 } from "./util.ts";
 
 export class IntakeError extends Error {}
@@ -146,11 +146,16 @@ export async function ingest(sql: Sql, env: Envelope, clientIp: string | null, d
   const srvSigs = serverSignals(v, history);
   const f = await face.analyzeSession(sql, Object.fromEntries(images.map((i) => [i.kind, i.data])), h.document_number);
   const all = [...devSigs, ...srvSigs, ...f.signals];
-  const s = score(all);
 
   const chip = payload.chip ?? {};
   const chipVerified = devSigs.some((x) => x.grp === "CHIP" && x.label.startsWith("SOD signature") && x.outcome === "PASS") &&
     !devSigs.some((x) => x.grp === "CHIP" && x.outcome === "FAIL");
+  const ladder = scoreWithLadder(all, {
+    chipVerified,
+    chipExpected: String(chip.expectation ?? ""),
+    documentNumber: h.document_number,
+  });
+  const s = { score: ladder.score, level: ladder.level, route: ladder.route };
   const ex = explain(all, s.level, s.score, chipVerified, String(chip.expectation ?? ""));
   const build = profile.build ?? {};
 
@@ -187,6 +192,13 @@ export async function ingest(sql: Sql, env: Envelope, clientIp: string | null, d
     await audit.record(tx, c, "system", "risk_assessed", {
       score: s.score, level: s.level, route: s.route, device_score: payload.deviceVerdict?.riskScore ?? null,
       recommendation: ex.recommendation, confidence: ex.confidence,
+      ladder: {
+        confidence: ladder.confidence,
+        steps: ladder.steps.map((st) => ({
+          id: st.id, title: st.title, confidence: st.confidence, risk: st.risk, outcome: st.outcome, summary: st.summary, weight: st.weight,
+        })),
+        agent: ladder.agent ?? null,
+      },
       fired: all.filter((x) => fired(x) && x.risk_points).map((x) => `${x.grp}:${x.label}:+${x.risk_points}`),
       face: { reference: f.reference, similarity: f.similarity, liveness: f.liveness, cluster: face.clusterLabel(cluster) },
     });
@@ -213,9 +225,14 @@ export async function caseForToken(sql: Sql, sessionId: string, token: string) {
 /** Recomputes score, level, route and explanation from the stored signals. */
 // deno-lint-ignore no-explicit-any
 export async function rescore(tx: any, caseId: number) {
-  const [c] = await tx`select chip_verified, chip_expected from attest.cases where id = ${caseId}`;
-  const sigs = await tx`select grp, label, outcome, value, risk_points from attest.signals where case_id = ${caseId} order by id`;
-  const s = score(sigs);
+  const [c] = await tx`select chip_verified, chip_expected, document_number from attest.cases where id = ${caseId}`;
+  const sigs = await tx`select grp, label, outcome, value, rule, risk_points, side, source from attest.signals where case_id = ${caseId} order by id`;
+  const ladder = scoreWithLadder(sigs, {
+    chipVerified: !!c.chip_verified,
+    chipExpected: c.chip_expected ?? "",
+    documentNumber: c.document_number ?? "",
+  });
+  const s = { score: ladder.score, level: ladder.level, route: ladder.route };
   const ex = explain(sigs, s.level, s.score, c.chip_verified, c.chip_expected);
   await tx`update attest.cases set risk_score = ${s.score}, risk_level = ${s.level}, route = ${s.route},
              assurance = ${assurance(s.level, c.chip_verified)}, summary = ${ex.summary}, recommendation = ${ex.recommendation},

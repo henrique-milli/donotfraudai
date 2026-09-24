@@ -16,6 +16,10 @@ export const policy = {
       unsignedPayload: 25, documentPreviouslyRejected: 70, deviceManyIdentities: 40, deviceIdentityThreshold: 3,
     },
   },
+  /** Confidence-path step weights (must sum ~1). Final risk = weighted (1 − step confidence). */
+  ladder: {
+    weights: { device: 0.2, document: 0.25, chipOrAgent: 0.3, face: 0.25 },
+  },
   face: {
     matchThreshold: 0.363, borderlineMargin: 0.07, searchThreshold: 0.5, samePersonThreshold: 0.5,
     burstThreshold: 0.5, livenessPass: 0.7, livenessFail: 0.2, gestureYaw: 0.18, gestureRoll: 10,

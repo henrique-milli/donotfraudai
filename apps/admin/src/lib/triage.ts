@@ -192,6 +192,24 @@ export interface CaseDetail {
   decisions: { action: string; note: string; analyst: string; followed_recommendation: boolean; created_at: string }[];
   audit: { id: number; at: string; actor: string; kind: string; hash: string }[];
   drivers: Signal[];
+  ladder?: {
+    confidence: number;
+    score: number;
+    level: string;
+    route: string;
+    steps: {
+      id: string;
+      title: string;
+      confidence: number;
+      risk: number;
+      outcome: Outcome;
+      summary: string;
+      signals: number;
+      fired: number;
+      weight: number;
+    }[];
+    agent: { confidence: number; summary: string; mode: string; lookups: string[] } | null;
+  };
 }
 
 // ---------------------------------------------------------------- presentation helpers
