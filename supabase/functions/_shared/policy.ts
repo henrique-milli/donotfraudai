@@ -23,7 +23,11 @@ export const policy = {
       noSelfie: 30, noFace: 40, multipleFaces: 40, livenessInconclusive: 35, livenessFail: 70, burstInconsistent: 50,
       faceBorderline: 40, faceMismatch: 70, portraitChipMismatch: 80, duplicateFace: 60, repeatAttempt: 30,
       portraitReused: 60, documentOtherFace: 80, gestureFailed: 70,
+      faceSwapFail: 70, faceSwapWarn: 40,
     },
+    /** faceswap / deepfake service (services/faceswap): swap_score above fail → FAIL, above warn → WARN */
+    swapFailFrom: 0.75,
+    swapWarnFrom: 0.35,
   },
   activeLiveness: { steps: 2, gestures: ["TURN_LEFT", "TURN_RIGHT", "TILT_LEFT", "TILT_RIGHT"], ttlHours: 24 },
   routes: { LOW: "CONTINUE", MEDIUM: "STEP_UP", HIGH: "MANUAL_REVIEW" } as Record<string, string>,

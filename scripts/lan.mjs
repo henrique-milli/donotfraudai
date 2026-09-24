@@ -39,6 +39,7 @@ export const PORTS = {
   supabaseDb: 54322,
   supabaseStudio: 54323,
   face: 8003,
+  faceswap: 8004,
 };
 
 export function urlsFor(ip) {
@@ -48,6 +49,7 @@ export function urlsFor(ip) {
     supabase: `http://${ip}:${PORTS.supabaseApi}`,
     studio: `http://127.0.0.1:${PORTS.supabaseStudio}`,
     face: `http://${ip}:${PORTS.face}`,
+    faceswap: `http://${ip}:${PORTS.faceswap}`,
     attest: `http://${ip}:${PORTS.supabaseApi}/functions/v1/attest`,
   };
 }

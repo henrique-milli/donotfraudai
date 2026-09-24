@@ -13,6 +13,7 @@ apps/android    Native Android onboarding app: Swiss ID / residence permit, chip
 apps/admin      Next.js L1 fraud-triage console (/triage)
 packages/shared Shared TypeScript contracts
 services/face   FastAPI — open-source face engine: detection, passive liveness, 1:1, 1:N on pgvector
+services/faceswap FastAPI — face-swap / deepfake check (**mock** contract; swap for a real model)
 supabase/       Postgres (+pgvector), Storage, the attest Edge Function
 ```
 
@@ -22,7 +23,7 @@ supabase/       Postgres (+pgvector), Storage, the attest Edge Function
 phone ── POST /v1/challenges ─────────────► single-use challenge
 phone: hardware-attested key bound to it · scan front/back · chip read when the card has one · selfie
 phone ── POST /v1/sessions {sealed} ─────► verify signature + attestation chain · face 1:1/1:N/liveness
-                                            · score · route: CONTINUE / STEP_UP / MANUAL_REVIEW
+                                            · faceswap/deepfake · score · route: CONTINUE / STEP_UP / MANUAL_REVIEW
 phone ── POST /v1/sessions/:id/next ─────► NONE | ACTIVE_LIVENESS {random gestures}
 analyst ── /triage ──────────────────────► queue · signals · images · recommendation · decision · audit
 ```
@@ -32,6 +33,7 @@ analyst ── /triage ───────────────────
 | Capture + on-device signals | `apps/android` | Presentation-attack checks, MRZ/OCR classification, ICAO chip symbol detection, chip read (PACE/BAC, passive authentication), device integrity, key attestation. Payload sealed to the API key (ECDH-ES P-256 + AES-256-GCM) and signed by the attested key |
 | API + risk engine | `supabase/functions/attest` | Deno Edge Function. Re-verifies everything the phone claims, rescoring from raw signals; the phone only ever learns its route |
 | Face engine | `services/face` | YuNet · SFace · MiniFASNet (MIT / Apache-2.0), OpenCV DNN, no torch at runtime |
+| Face-swap / deepfake | `services/faceswap` | **Mock** today (`mode: mock`); stable `POST /v1/analyze` contract for a real detector |
 | Data | `supabase/migrations` | Private schemas `attest` (cases, signals, hash-chained audit) and `face` (pgvector HNSW gallery), private bucket `case-images` |
 | Console | `apps/admin/src/app/triage` | Queue, case view, face clusters, audit trail; shared analyst token |
 
@@ -44,7 +46,7 @@ Neither private schema is exposed through the Data API; only the edge function r
 | **Chip downgrade**: a chipped card, but the attacker skips the chip and goes through the photo-only path | The strong check is optional, so fraud takes the weak one; both end in the same identity | The ICAO chip symbol is detected on the card itself. When it's there and the phone has NFC, the chip read is **required**: DG1 must match the printed MRZ and the issuer's signature must verify. A refused tap is scored and routed, not waved through |
 | **Screen replay / print / colour copy** of a real card | Account opened with someone else's document | On-device presentation-attack checks (physical vs screen vs paper, moiré, colourfulness), reported as signals, never silently dropped |
 | **Photo substitution** on a genuine card | Impostor's face on a real document | Printed portrait vs the chip's signed DG2 photo; selfie matched 1:1 against the chip photo first |
-| **Deepfake / replayed selfie** | Face check passed without a live person | Passive liveness over the selfie + burst frames; burst frames must be the same face. Medium risk triggers **active liveness**: random gestures, checked server-side from landmarks, opposite gestures must move in opposite directions |
+| **Deepfake / face-swap / replayed selfie** | Face check passed without a live person | Passive liveness (MiniFASNet) + burst consistency; **faceswap service** (`services/faceswap`, mock contract) scores swap/deepfake injection; medium risk triggers **active liveness** (random gestures) |
 | **One face, many documents** (mules, synthetic identities) | One fraudster opens many accounts | 1:N over live selfies clusters faces across sessions. The console shows how many documents each face has tried, and flags a document already presented by a different face |
 | **Emulator, rooted phone, hooking, injected camera** | Everything above is bypassed at the source | Hardware key attestation (StrongBox/TEE, verified boot, lock state, app identity), re-parsed on the server from the certificate chain. Root, hook, emulator and debugger checks, plus a boot-state consistency check (OS properties vs attested boot) |
 | **Tampered or replayed payload** | Forged signals reach the backend | Payload signed by the attested key over a single-use server challenge, sealed with ECDH-ES P-256 + AES-256-GCM. The server rescores from raw signals; the phone's own score is advisory |
@@ -105,6 +107,7 @@ Docker is only required for Auth / Postgres / Studio. Start the daemon, then `pn
 | Attest API | `http://<lan-ip>:54321/functions/v1/attest` |
 | Supabase Studio | http://localhost:54323 |
 | Face | `http://<lan-ip>:8003/health` |
+| Faceswap (mock) | `http://<lan-ip>:8004/health` |
 
 Empty queue? `pnpm attest:seed` pushes six synthetic, clearly flagged sessions (screen replay, chip downgrade, emulator, rooted phone, B/W copy, clean chip read) through the real intake path.
 

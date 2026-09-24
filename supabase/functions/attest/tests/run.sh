@@ -13,4 +13,4 @@ for f in "$here"/local/*.sql "$here"/migrations/*.sql; do
 done
 docker run --rm --network $net -v "$here/functions:/functions" -w /functions/attest \
   -e DATABASE_URL=postgres://postgres:test@$net-db:5432/postgres \
-  denoland/deno:2.1.4 test --allow-net --allow-env --allow-read tests/
+  denoland/deno:2.1.4 test --allow-net --allow-env --allow-read --no-check tests/

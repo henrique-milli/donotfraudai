@@ -4,15 +4,16 @@
  *
  * Session (passive, default):
  *   selfie present · one face · passive liveness over selfie + burst frames · burst frames are all the
- *   same face · 1:1 selfie vs reference (chip DG2 photo if read, else ID portrait) · printed portrait vs
- *   chip photo · 1:N over people: face cluster, other documents, repeat attempts, document presented
- *   before by someone else, document photo reused
+ *   same face · face-swap / deepfake injection (services/faceswap) · 1:1 selfie vs reference (chip DG2
+ *   photo if read, else ID portrait) · printed portrait vs chip photo · 1:N over people: face cluster,
+ *   other documents, repeat attempts, document presented before by someone else, document photo reused
  *
  * Re-verification (active, requested by the risk engine on MEDIUM or by an analyst):
  *   each requested gesture visible in its frame (pose change from the neutral selfie, measured by the
  *   service from landmarks) · liveness on every frame · new selfie matches the first selfie and the reference
  */
 import * as fc from "./faceclient.ts";
+import * as fswap from "./faceswapclient.ts";
 import type { Sql } from "./db.ts";
 import { policy } from "./policy.ts";
 import { type Sig, sig } from "./risk.ts";
@@ -84,6 +85,33 @@ export async function analyzeSession(sql: Sql, images: Record<string, Uint8Array
   const lives = [...(selfie ? [selfie] : []), ...bursts].filter((p) => p.faces && p.live !== null).map((p) => p.live!);
   const ls = livenessSig("Passive liveness (server)", lives);
   if (ls) { out.signals.push(ls); out.liveness = mean(lives); }
+
+  // face-swap / deepfake injection (services/faceswap — mock today; same contract for a real model)
+  const swapFrames = Object.fromEntries(
+    Object.entries(wanted).filter(([k]) => k === "selfie" || k.startsWith("burst")),
+  );
+  if (Object.keys(swapFrames).length) {
+    try {
+      const sw = await fswap.analyze("", swapFrames);
+      const failAt = cfg.swapFailFrom, warnAt = cfg.swapWarnFrom;
+      const val = `swap_score ${sw.swapScore.toFixed(2)} · ${sw.model} · ${sw.mode}` +
+        (sw.artifacts.length ? ` · ${sw.artifacts.slice(0, 3).join(", ")}` : "");
+      const rule = `swap_score < ${warnAt} pass · ≥ ${failAt} fail (${sw.mode})`;
+      let outcome: "PASS" | "WARN" | "FAIL" = "PASS";
+      let pts = 0;
+      if (sw.injectionLikely || sw.swapScore >= failAt) {
+        outcome = "FAIL";
+        pts = w.faceSwapFail;
+      } else if (sw.swapScore >= warnAt) {
+        outcome = "WARN";
+        pts = w.faceSwapWarn;
+      }
+      out.signals.push(sig(G, "Face-swap / deepfake", outcome, val, rule, pts));
+    } catch (e) {
+      if (!(e instanceof fswap.Unavailable)) throw e;
+      out.signals.push(sig(G, "Face-swap / deepfake", "INFO", `unavailable: ${e.message}`.slice(0, 200), "services/faceswap"));
+    }
+  }
 
   // burst consistency: every passive frame shows the selfie's face
   if (selfie?.embedding && bursts.length) {
