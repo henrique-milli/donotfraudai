@@ -1,0 +1,20 @@
+# Optional. `pnpm dev` already runs these on the host with hot reload.
+# Use compose when you want the models isolated from the laptop Python.
+services:
+  vision:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    volumes:
+      - ./services/vision:/app
+    ports:
+      - "8001:8001"
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+
+  risk:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    volumes:
+      - ./services/risk:/app
+    ports:
+      - "8002:8002"
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload

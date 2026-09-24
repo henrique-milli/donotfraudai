@@ -1,0 +1,50 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# env (generated LAN IPs + keys — keep examples)
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# logs / caches
+*.log
+.turbo
+.next
+.expo
+dist
+build
+coverage
+.cache
+*.tsbuildinfo
+
+# python
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+*.egg-info
+
+# supabase
+supabase/.temp
+supabase/.branches
+
+# os / editor
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+
+# native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+android/
+ios/
+!apps/mobile/android/
+!apps/mobile/ios/

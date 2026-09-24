@@ -1,0 +1,28 @@
+{
+  "name": "donotfraudai",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Zürich Hackathon 2026 — fight identity fraud and deepfakes without killing onboarding.",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "lan": "node scripts/write-env.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:tunnel": "node scripts/dev.mjs --tunnel",
+    "dev:web": "node scripts/dev.mjs --no-mobile",
+    "phone:usb": "node scripts/adb-reverse.mjs",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:studio": "node -e \"import('node:child_process').then(c=>c.execSync('xdg-open http://localhost:54323',{stdio:'ignore'}))\"",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "supabase": "^2.84.4",
+    "turbo": "^2.5.8"
+  }
+}

@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07110f;
+  --foreground: #e8f3ef;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #134e4a;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ecfdf5;
+}
+
+.btn:hover {
+  background: #0f766e;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn-warn {
+  background: #881337;
+}
+
+.btn-warn:hover {
+  background: #9f1239;
+}
