@@ -36,7 +36,7 @@ export async function parseKeyDescription(leaf: x509.X509Certificate): Promise<K
   if (!ext) return null;
   let raw = new Uint8Array(ext.value);
   let [top] = parse(raw);
-  if (top.tag === 0x04 && top.cls === 0) { raw = top.value; [top] = parse(raw); } // unwrap OCTET STRING if present
+  if (top.tag === 0x04 && top.cls === 0) { raw = new Uint8Array(top.value); [top] = parse(raw); } // unwrap OCTET STRING if present
   const seq = children(top);
   const kd: KeyDescription = {
     attestationVersion: int(seq[0]), securityLevel: LEVELS[int(seq[1])] ?? String(int(seq[1])), challenge: seq[4].value,
@@ -108,11 +108,11 @@ export async function verifyCert(cert: x509.X509Certificate, issuer: x509.X509Ce
       const [algId, bits] = children(parse(spki)[0]);
       const curve = CURVE[hex(children(algId)[1]?.value ?? new Uint8Array())];
       if (!curve) return false;
-      const digest = new Uint8Array(await crypto.subtle.digest(hash, tbs));
+      const digest = new Uint8Array(await crypto.subtle.digest(hash, new Uint8Array(tbs)));
       return curve.verify(derToP1363(sig, curve.size), digest, bits.value.subarray(1), { prehash: false, lowS: false });
     }
     const key = await crypto.subtle.importKey("spki", spki, { name: "RSASSA-PKCS1-v1_5", hash }, false, ["verify"]);
-    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, sig, tbs);
+    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, new Uint8Array(sig), new Uint8Array(tbs));
   } catch {
     return false;
   }
@@ -143,7 +143,12 @@ export async function verify(sql: Sql, body: { payload: string; sig: string | nu
   if (body.sig && chain.length) {
     try {
       const key = await chain[0].publicKey.export({ name: "ECDSA", namedCurve: "P-256" }, ["verify"]);
-      v.signatureOk = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key, derToP1363(unb64(body.sig)), utf8.encode(body.payload));
+      v.signatureOk = await crypto.subtle.verify(
+        { name: "ECDSA", hash: "SHA-256" },
+        key,
+        new Uint8Array(derToP1363(unb64(body.sig))),
+        utf8.encode(body.payload),
+      );
     } catch { v.signatureOk = false; }
   } else if (body.sig) {
     v.signatureOk = false; v.errors.push("signature present but no certificate chain");

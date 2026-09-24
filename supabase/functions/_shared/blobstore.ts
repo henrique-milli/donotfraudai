@@ -13,7 +13,12 @@ export const enabled = () => Deno.env.get("ATTEST_IMAGES_IN_DB") !== "1" && !!(u
 function req(method: string, k: string, data?: Uint8Array, mime?: string) {
   const headers: Record<string, string> = { authorization: `Bearer ${key()}`, apikey: key() };
   if (data) Object.assign(headers, { "content-type": mime ?? "application/octet-stream", "x-upsert": "true" });
-  return fetch(`${url()}/storage/v1/object/${bucket()}/${k}`, { method, headers, body: data, signal: AbortSignal.timeout(30_000) });
+  return fetch(`${url()}/storage/v1/object/${bucket()}/${k}`, {
+    method,
+    headers,
+    body: data ? new Uint8Array(data) : undefined,
+    signal: AbortSignal.timeout(30_000),
+  });
 }
 
 export async function put(k: string, data: Uint8Array, mime: string) {
