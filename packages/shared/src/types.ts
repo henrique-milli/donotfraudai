@@ -1,12 +1,13 @@
 // attest API (supabase/functions/attest): what the phone and the console exchange
 
 /** The only thing the phone learns about its session: never the score or the reasons. */
-export type AttestRoute = "CONTINUE" | "STEP_UP" | "MANUAL_REVIEW";
+export type AttestRoute = "CONTINUE" | "MANUAL_REVIEW" | "BRANCH_VISIT" | "STEP_UP";
 export type AttestLevel = "LOW" | "MEDIUM" | "HIGH";
 export type AttestCaseStatus =
   | "AUTO_APPROVED"
   | "STEP_UP_REQUESTED"
   | "IN_TRIAGE"
+  | "BRANCH_INVITED"
   | "ESCALATED"
   | "APPROVED"
   | "REJECTED";

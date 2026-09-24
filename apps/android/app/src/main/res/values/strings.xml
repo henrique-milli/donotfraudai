@@ -90,6 +90,12 @@
 
     <string name="done_title">You\'re all set</string>
     <string name="done_body">Thanks. We\'re confirming your document and will let you know shortly.</string>
+    <string name="done_title_ok">You\'re verified</string>
+    <string name="done_body_ok">Your identity check is complete. You can close this screen.</string>
+    <string name="done_title_review">We\'re reviewing</string>
+    <string name="done_body_review">Thanks. A specialist is reviewing your submission and will follow up shortly.</string>
+    <string name="done_title_branch">Please visit a branch</string>
+    <string name="done_body_branch">We couldn\'t finish this check online. Please visit your nearest branch with your ID — you can appeal and complete verification there.</string>
     <string name="done_again">Done</string>
 
     <string name="result_again">Verify another document</string>

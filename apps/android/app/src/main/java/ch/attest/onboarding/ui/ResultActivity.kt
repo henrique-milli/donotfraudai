@@ -46,7 +46,7 @@ class ResultActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val preview = intent.getBooleanExtra(EXTRA_APPLICANT, false)
-        if (preview) { applicant(true); return }
+        if (preview) { applicant(true, null); return }
         if (intent.getBooleanExtra(EXTRA_REVERIFIED, false)) { reverified(); return }
         // attestation → sign → seal → deliver; then ask the backend whether it needs an active check
         presenterLoading()
@@ -60,9 +60,9 @@ class ResultActivity : AppCompatActivity() {
                 if (isFinishing) return@runOnUiThread
                 when {
                     Mode.stage -> presenter(sealed, pending)
-                    // applicant: the step-up is simply the next screen, with no reason given
+                    // applicant: analyst-requested step-up is simply the next screen, with no reason given
                     pending != null -> { startActivity(SelfieActivity.active(this, pending)); finish() }
-                    else -> applicant(false)
+                    else -> applicant(false, sealed?.route)
                 }
             }
         }.start()
@@ -97,11 +97,33 @@ class ResultActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------------ applicant
 
-    private fun applicant(preview: Boolean) {
+    private fun applicant(preview: Boolean, route: String?) {
         val b = ActivityDoneBinding.inflate(layoutInflater)
         setContentView(b.root)
         b.root.padForSystemBars()
+        // Polite endings only — never scores or reasons (oracle-safe).
+        when (route) {
+            "CONTINUE" -> {
+                b.title.setText(R.string.done_title_ok)
+                b.body.setText(R.string.done_body_ok)
+            }
+            "BRANCH_VISIT" -> {
+                b.title.setText(R.string.done_title_branch)
+                b.body.setText(R.string.done_body_branch)
+            }
+            "MANUAL_REVIEW" -> {
+                b.title.setText(R.string.done_title_review)
+                b.body.setText(R.string.done_body_review)
+            }
+            else -> {
+                b.title.setText(R.string.done_title)
+                b.body.setText(R.string.done_body)
+            }
+        }
         b.presenterNote.visibility = if (preview) View.VISIBLE else View.GONE
+        if (preview) {
+            b.presenterNote.text = "Presenter: applicant ending for route ${route ?: "(preview)"}. No scores or reasons."
+        }
         b.mark.scaleX = 0.5f; b.mark.scaleY = 0.5f; b.mark.alpha = 0f
         b.mark.animate().scaleX(1f).scaleY(1f).alpha(1f).setStartDelay(120).setDuration(380).start()
         b.btnDone.setOnClickListener { if (preview) finish() else home() }
@@ -161,7 +183,7 @@ class ResultActivity : AppCompatActivity() {
         b.gauge.set(score)
         b.verdict.text = v.title
         b.verdict.setTextColor(
-            c(when (v) { Session.Verdict.ACCEPTED -> R.color.at_pass; Session.Verdict.REVIEW -> R.color.at_warn; Session.Verdict.REJECTED -> R.color.at_fail }),
+            c(when (v) { Session.Verdict.ACCEPTED -> R.color.at_pass; Session.Verdict.REVIEW -> R.color.at_warn; Session.Verdict.BRANCH -> R.color.at_fail }),
         )
         b.assurance.text = "Assurance · ${a.title}"
         b.assuranceDetail.text = a.detail

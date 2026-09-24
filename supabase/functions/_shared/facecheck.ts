@@ -26,7 +26,7 @@ const w = cfg.weights;
 export const clusterLabel = (id: number | string | null) => (id == null ? null : `F-${String(id).padStart(5, "0")}`);
 export const STATUS_LABEL: Record<string, string> = {
   AUTO_APPROVED: "Auto-approved", STEP_UP_REQUESTED: "Step-up requested", IN_TRIAGE: "In triage",
-  ESCALATED: "Escalated", APPROVED: "Approved", REJECTED: "Rejected",
+  BRANCH_INVITED: "Branch visit invited", ESCALATED: "Escalated", APPROVED: "Approved", REJECTED: "Rejected",
 };
 
 /** A template to enroll in the service gallery once the case exists (the API keeps no embedding). */

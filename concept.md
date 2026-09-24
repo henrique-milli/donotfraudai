@@ -17,19 +17,21 @@ Even assuming documents can be forged, the residual risk looks like mule economi
 
 Capture runs as a **fixed sequence**. There is no mid-process exit: the applicant completes the steps, the phone seals the session, and the server **scores once**.
 
-The dynamic part is the **route after that score** — auto-approval that skips human-in-the-loop when confidence is high enough:
+There is **no hard auto-denial**. Auto-reject is a grey zone — when confidence is too low for remote approval, we invite the applicant to a branch instead of an unappealable refusal.
 
-| Route | Meaning |
-| --- | --- |
-| **CONTINUE** | Auto-approve; skips HITL |
-| **STEP_UP** | More proof needed (e.g. active liveness / randomized challenges) |
-| **MANUAL_REVIEW** | Online human review, or a branch visit |
+| Confidence | Server route | Outcome |
+| --- | --- | --- |
+| **High** | `CONTINUE` | Auto-approve; skips human-in-the-loop |
+| **Medium** | `MANUAL_REVIEW` | Online human review (triage) |
+| **Low** | `BRANCH_VISIT` | Polite invite to the nearest branch (annoying, but appealable) |
+
+Analysts may still reject after review. The phone never learns scores or reasons — only the route.
 
 1. **Device.** We aggregate metrics that assess hardware reliability. That raises confidence that submitted photos and videos come from a real camera, not a compromised one.
 2. **Document photos.** The user photographs the ID. We check quality, tampering, and overall reliability, then pick one of two alternatives:
   - **NFC chip (preferred).** If the ID has a chip, the user taps it. A valid chip proves they hold a real, untampered ID.
   - **Document agent (fallback).** If NFC is missing or fails, an agent runs extensive online lookups to raise confidence instead.
-3. **Face scan.** The user submits a live selfie (and short burst). When the score still needs proof of human, they are asked to do something that cannot be filmed in advance (**PoH** — randomized challenges). We check:
+3. **Face scan.** The user submits a live selfie (and short burst). When more proof of human is needed, they may be asked to do something that cannot be filmed in advance (**PoH** — randomized challenges). We check:
   - Tampering: live face-swap / deepfake injection.
   - Face matches the document.
   - Biometric uniqueness: this face is not already enrolled under another identity (**PoU**).

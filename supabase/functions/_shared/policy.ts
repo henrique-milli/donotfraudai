@@ -30,5 +30,5 @@ export const policy = {
     swapWarnFrom: 0.35,
   },
   activeLiveness: { steps: 2, gestures: ["TURN_LEFT", "TURN_RIGHT", "TILT_LEFT", "TILT_RIGHT"], ttlHours: 24 },
-  routes: { LOW: "CONTINUE", MEDIUM: "STEP_UP", HIGH: "MANUAL_REVIEW" } as Record<string, string>,
+  routes: { LOW: "CONTINUE", MEDIUM: "MANUAL_REVIEW", HIGH: "BRANCH_VISIT" } as Record<string, string>,
 };
