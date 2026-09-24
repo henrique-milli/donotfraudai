@@ -35,30 +35,19 @@ export function detectLanIp() {
 
 export const PORTS = {
   admin: 3000,
-  metro: 8081,
   supabaseApi: 54321,
   supabaseDb: 54322,
   supabaseStudio: 54323,
-  vision: 8001,
-  risk: 8002,
-};
-
-/** Official local-demo JWTs from the Supabase CLI. Safe to commit; never use in prod. */
-export const LOCAL_SUPABASE = {
-  anonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
-  serviceRoleKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+  face: 8003,
 };
 
 export function urlsFor(ip) {
   return {
     lanIp: ip,
     admin: `http://${ip}:${PORTS.admin}`,
-    metro: `http://${ip}:${PORTS.metro}`,
     supabase: `http://${ip}:${PORTS.supabaseApi}`,
     studio: `http://127.0.0.1:${PORTS.supabaseStudio}`,
-    vision: `http://${ip}:${PORTS.vision}`,
-    risk: `http://${ip}:${PORTS.risk}`,
+    face: `http://${ip}:${PORTS.face}`,
+    attest: `http://${ip}:${PORTS.supabaseApi}/functions/v1/attest`,
   };
 }

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Attest</string>
+
+    <string name="home_kicker">Identity check</string>
+    <string name="home_title">Verify your Swiss ID in under a minute</string>
+    <string name="home_body">Scan both sides of your card. If it has a chip, tap it to your phone. That\'s it.</string>
+    <string name="home_choose">Your document</string>
+    <string name="home_steps">How it works</string>
+    <string name="home_loading">Preparing on-device checks…</string>
+    <string name="home_models_error">Could not prepare the on-device checks</string>
+    <string name="home_continue">Start</string>
+    <string name="home_private">Checks run on this phone. Photos are encrypted for the verification team only.</string>
+    <string name="home_stage_title">Verbose view</string>
+    <string name="home_stage_body">Every signal, score and reason is shown live, including during capture. Switch to Production to see exactly what an applicant sees: guidance only, no indicators. The same signals are collected silently either way. Release builds have no verbose view.</string>
+    <string name="mode_stage_on">Verbose: every signal shown live</string>
+    <string name="mode_stage_off">Production: no indicators, signals collected silently</string>
+    <string name="camera_required">Camera access is needed to scan your document</string>
+
+    <string name="step_front">Front</string>
+    <string name="step_back">Back</string>
+    <string name="step_chip">Chip</string>
+
+    <string name="scan_front_title">Front of your card</string>
+    <string name="scan_back_title">Back of your card</string>
+    <string name="scan_front_hint">Place the side with your photo inside the frame</string>
+    <string name="scan_back_hint">Turn your card over. Keep the three lines of code in view</string>
+    <string name="scan_checking">Checking</string>
+    <string name="flip_title">Turn your card over</string>
+    <string name="flip_body">Now the back: keep the three lines of code sharp and inside the frame</string>
+    <string name="scan_hold">Hold still</string>
+    <string name="scan_done">Got it</string>
+
+    <string name="hint_no_card">Place your card inside the frame</string>
+    <string name="hint_center">Center the card in the frame</string>
+    <string name="hint_dark">Find a brighter spot</string>
+    <string name="hint_closer">Move a little closer</string>
+    <string name="hint_blur">Hold steady, the image is blurry</string>
+    <string name="hint_fingers">Keep your fingers off the card</string>
+    <string name="hint_glare">Tilt the card slightly to avoid glare</string>
+    <string name="hint_photo">Make sure the photo is clearly visible</string>
+    <string name="hint_mrz">Keep the three lines of code sharp and in view</string>
+
+    <string name="doc_mismatch_title">This looks like a %1$s</string>
+    <string name="doc_mismatch_body">You chose %1$s, but the card you scanned reads as a %2$s. Continue with the correct document type?</string>
+    <string name="doc_mismatch_switch">Yes, it\'s a %1$s</string>
+    <string name="doc_mismatch_keep">No, keep my choice</string>
+    <string name="nfc_title">Tap your card</string>
+    <string name="nfc_body">Hold your card flat against the back of your phone, near the camera, and keep still for a few seconds.</string>
+    <string name="nfc_reading">Reading your chip. Keep still…</string>
+    <string name="nfc_skip">My card has no chip</string>
+    <string name="nfc_settings">Turn on NFC</string>
+    <string name="nfc_off">NFC is off. Turn it on to read the chip.</string>
+    <string name="nfc_none">This phone cannot read chips, so we\'ll continue without it.</string>
+    <string name="nfc_retry">That didn\'t work. Hold the card still against the phone and try again.</string>
+    <string name="nfc_bac">We couldn\'t open the chip. Rescan the back of your card so we can read the code.</string>
+    <string name="nfc_continue">Continue</string>
+    <string name="nfc_body_required">Your card has a chip, so we need to read it. Hold your card flat against the back of your phone, near the camera, and keep still for a few seconds.</string>
+    <string name="nfc_none_expected">Your card has a chip, but this phone cannot read chips. We\'ll continue with the photos only, which may take longer to confirm.</string>
+    <string name="nfc_give_up">I can\'t get the chip to read</string>
+
+    <string name="step_face">Selfie</string>
+    <string name="selfie_title">Take a selfie</string>
+    <string name="selfie_active_title">One more quick check</string>
+    <string name="selfie_hint_loading">Getting the camera ready…</string>
+    <string name="selfie_hint_place">Place your face in the oval</string>
+    <string name="selfie_hint_one">Only one face, please</string>
+    <string name="selfie_hint_closer">Move a little closer</string>
+    <string name="selfie_hint_further">Move back a little</string>
+    <string name="selfie_hint_center">Center your face in the oval</string>
+    <string name="selfie_hint_blur">Hold still</string>
+    <string name="selfie_hint_eyes">Keep your eyes open and look at the screen</string>
+    <string name="selfie_hint_dark">Find a brighter place</string>
+    <string name="selfie_hint_light">Avoid strong light on your face</string>
+    <string name="selfie_hint_straight">Look straight at the camera</string>
+    <string name="selfie_hint_hold">Hold still…</string>
+    <string name="selfie_hint_done">Done</string>
+    <string name="selfie_active_intro">Follow the instructions on screen</string>
+    <string name="gesture_TURN_LEFT">← Turn your head left</string>
+    <string name="gesture_TURN_RIGHT">Turn your head right →</string>
+    <string name="gesture_TILT_LEFT">↖ Tilt your head left</string>
+    <string name="gesture_TILT_RIGHT">Tilt your head right ↗</string>
+    <string name="gesture_MOVE_CLOSER">Move closer</string>
+    <string name="gesture_MOVE_FURTHER">Move back</string>
+    <string name="gesture_back_neutral">Now look straight ahead</string>
+    <string name="pending_title">Additional verification requested</string>
+    <string name="pending_body">We need one more quick selfie check to finish verifying your identity.</string>
+    <string name="pending_start">Continue</string>
+    <string name="finishing">Finishing up…</string>
+
+    <string name="done_title">You\'re all set</string>
+    <string name="done_body">Thanks. We\'re confirming your document and will let you know shortly.</string>
+    <string name="done_again">Done</string>
+
+    <string name="result_again">Verify another document</string>
+    <string name="result_as_applicant">See what the applicant sees</string>
+    <string name="result_drivers">Why this score</string>
+    <string name="result_no_drivers">No risk signal fired.</string>
+    <string name="result_signals">Signals</string>
+    <string name="result_holder">Holder</string>
+    <string name="result_images">Captured</string>
+    <string name="result_footnote">Risk points are hand-set weights for this demo, not a trained model. The same signals are written to the session payload in production, where the applicant sees none of them.</string>
+</resources>

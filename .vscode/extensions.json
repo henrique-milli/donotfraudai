@@ -1,11 +1,11 @@
 {
   "recommendations": [
-    "expo.vscode-expo-tools",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
     "ms-python.python",
     "charliermarsh.ruff",
-    "denoland.vscode-deno"
+    "denoland.vscode-deno",
+    "fwcd.kotlin"
   ]
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="at_gutter">24dp</dimen>
+    <dimen name="at_radius">16dp</dimen>
+    <dimen name="at_button_h">56dp</dimen>
+</resources>

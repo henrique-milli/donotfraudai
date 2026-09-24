@@ -1,0 +1,4 @@
+# built by tools/build_face_models.py (or the Dockerfile), never committed
+face_models/
+# local SQLite gallery
+data/

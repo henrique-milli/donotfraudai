@@ -46,5 +46,4 @@ Thumbs.db
 *.mobileprovision
 android/
 ios/
-!apps/mobile/android/
-!apps/mobile/ios/
+!apps/android/
