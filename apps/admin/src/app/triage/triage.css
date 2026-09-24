@@ -89,6 +89,15 @@
 .tri .s-escalated { background: #fff1e6; color: #b45309; }
 .tri .s-branch_invited { background: var(--warn-bg); color: var(--warn); }
 .tri .s-in_triage, .tri .s-step_up_requested { background: #eef2ff; color: #3730a3; }
+.tri .ladder { display: grid; gap: 10px; margin-bottom: 20px; }
+.tri .ladder-step { background: var(--card, #fff); border: 1px solid #e8eaef; border-radius: 12px; padding: 12px 14px; }
+.tri .ladder-step .ls-top { display: flex; align-items: center; gap: 8px; }
+.tri .ladder-step .ls-conf { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tri .ladder-step .ls-bar { height: 6px; background: #eef0f4; border-radius: 99px; margin: 8px 0 6px; overflow: hidden; }
+.tri .ladder-step .ls-bar i { display: block; height: 100%; background: var(--pass); border-radius: 99px; }
+.tri .ladder-step.o-warn .ls-bar i { background: var(--warn); }
+.tri .ladder-step.o-fail .ls-bar i { background: var(--fail); }
+.tri .ladder-step.o-skipped .ls-bar i, .tri .ladder-step.o-info .ls-bar i { background: #94a3b8; }
 .tri .idrow { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 20px; }
 .tri .identity { display: flex; gap: 16px; }
 .tri .photo { width: 104px; height: 128px; border-radius: 10px; background: linear-gradient(160deg, #e7ecf7, #cfd9ee); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: var(--navy); flex: none; }

@@ -259,10 +259,31 @@ function Case({ d, fail, onChange }: { d: CaseDetail; fail: (e: unknown) => void
           </>
         ) : null}
 
-        <div className="ph"><h2>Fraud signals</h2><span className="muted small">{signalCount} signals · click a row for details</span></div>
+        <div className="ph"><h2>Confidence path</h2><span className="muted small">step scores → final risk {c.risk_score}/100 · {(d.ladder?.confidence != null ? `${Math.round(d.ladder.confidence * 100)}% overall confidence` : "")}</span></div>
+        {d.ladder ? (
+          <div className="ladder">
+            {d.ladder.steps.map((st) => (
+              <div key={st.id} className={`ladder-step o-${(st.outcome || "INFO").toLowerCase()}`}>
+                <div className="ls-top">
+                  <Oc o={st.outcome} />
+                  <b>{st.title}</b>
+                  <span className="ls-conf">{Math.round(st.confidence * 100)}%</span>
+                  <span className="muted small">weight {Math.round(st.weight * 100)}%</span>
+                </div>
+                <div className="ls-bar"><i style={{ width: `${Math.round(st.confidence * 100)}%` }} /></div>
+                <p className="small muted">{st.summary}</p>
+              </div>
+            ))}
+            {d.ladder.agent ? (
+              <p className="small muted">Document agent ({d.ladder.agent.mode}): {d.ladder.agent.summary}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="ph"><h2>Raw signals</h2><span className="muted small">{signalCount} signals · optional detail</span></div>
         <div className="signals">
           {d.groups.map((g) => (
-            <details key={g.key} open={g.open}>
+            <details key={g.key} open={false}>
               <summary>
                 <Oc o={g.worst} />
                 <span className="gname">{g.title}</span>
