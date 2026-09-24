@@ -12,6 +12,18 @@ services:
     volumes:
       - face-data:/data
 
+  # Mock face-swap / deepfake check (stable /v1/analyze contract; swap body for a real model).
+  faceswap:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    volumes:
+      - ./services/faceswap:/app
+    ports:
+      - "8004:8004"
+    environment:
+      FACESWAP_SERVICE_TOKEN: ${FACESWAP_SERVICE_TOKEN:-}
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8004 --reload
+
   # --- `docker compose --profile standalone up`: the attest API without the Supabase CLI
   # (plain Postgres + pgvector, same migrations, images stored in the database).
   attest-db:
@@ -41,6 +53,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@attest-db:5432/postgres
       ATTEST_IMAGES_IN_DB: "1"
       FACE_SERVICE_URL: http://face:8003
+      FACESWAP_SERVICE_URL: http://faceswap:8004
     volumes:
       - ./supabase/functions:/functions:ro
     ports:
@@ -48,6 +61,10 @@ services:
     depends_on:
       attest-db:
         condition: service_healthy
+      face:
+        condition: service_started
+      faceswap:
+        condition: service_started
 
 volumes:
   face-data:
