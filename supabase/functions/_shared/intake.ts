@@ -1,8 +1,9 @@
 /**
  * Session intake: envelope → verified payload → server signals → score → route → case.
  *
- * The response to the phone carries only the route (CONTINUE / STEP_UP / MANUAL_REVIEW), never the
+ * The response to the phone carries only the route (CONTINUE / MANUAL_REVIEW / BRANCH_VISIT), never the
  * reasons: the applicant-facing channel must not become an oracle an attacker can iterate against.
+ * STEP_UP remains only for analyst-requested active liveness (REQUEST_VERIFICATION), not auto-routing.
  */
 import * as audit from "./audit.ts";
 import { verify } from "./attestation.ts";
@@ -16,18 +17,25 @@ import { sha256Hex, unb64 } from "./util.ts";
 
 export class IntakeError extends Error {}
 
-export const STATUS_FOR_ROUTE: Record<string, string> = { CONTINUE: "AUTO_APPROVED", STEP_UP: "STEP_UP_REQUESTED", MANUAL_REVIEW: "IN_TRIAGE" };
-export const OPEN = ["STEP_UP_REQUESTED", "IN_TRIAGE", "ESCALATED"];
+export const STATUS_FOR_ROUTE: Record<string, string> = {
+  CONTINUE: "AUTO_APPROVED",
+  MANUAL_REVIEW: "IN_TRIAGE",
+  BRANCH_VISIT: "BRANCH_INVITED",
+  /** Analyst-requested active liveness only — not an auto score route. */
+  STEP_UP: "STEP_UP_REQUESTED",
+};
+export const OPEN = ["STEP_UP_REQUESTED", "IN_TRIAGE", "ESCALATED", "BRANCH_INVITED"];
 export const ACTIONS = ["APPROVE", "REQUEST_VERIFICATION", "ESCALATE", "REJECT"];
 const NEXT_STATUS: Record<string, string> = { APPROVE: "APPROVED", REJECT: "REJECTED", ESCALATE: "ESCALATED", REQUEST_VERIFICATION: "STEP_UP_REQUESTED" };
+
+const assurance = (level: string, chipVerified: boolean) =>
+  level === "LOW" ? (chipVerified ? "HIGH" : "SUBSTANTIAL") : "PENDING";
+
 
 export const KIND_PATTERN = /^(rv\d{1,2}_)?(front|back|portrait|chipPhoto|selfie|burst[1-4]|active[1-6])$/;
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 export interface Img { kind: string; mime: string; width: number; height: number; sha256: string; data: Uint8Array }
-
-const assurance = (level: string, chipVerified: boolean) =>
-  level === "HIGH" ? "NONE" : level === "LOW" ? (chipVerified ? "HIGH" : "SUBSTANTIAL") : "PENDING";
 
 /** Pops payload.images (kept out of the stored JSON), validates each one, leaves a manifest. */
 // deno-lint-ignore no-explicit-any
@@ -264,8 +272,8 @@ async function ingestReverification(sql: Sql, body: { payload: string; sig: stri
                result = ${tx.json({ passed, similarity: f.similarity, liveness: f.liveness, signals: fresh.map((s) => `${s.label}: ${s.outcome}`) })}
              where id = ${rv.id}`;
     const s = await rescore(tx, c.id);
-    // pass -> continue onboarding; fail or still uncertain -> manual review
-    const status = passed && s.level === "LOW" ? "AUTO_APPROVED" : "IN_TRIAGE";
+    // pass + high confidence → auto-approve; low confidence → branch invite; else triage
+    const status = STATUS_FOR_ROUTE[s.route] ?? (passed && s.level === "LOW" ? "AUTO_APPROVED" : "IN_TRIAGE");
     await tx`update attest.cases set status = ${status},
                face_similarity = coalesce(${f.similarity}, face_similarity),
                face_reference = case when ${f.reference} <> '' then ${f.reference} else face_reference end,

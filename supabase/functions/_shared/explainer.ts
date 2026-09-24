@@ -46,14 +46,14 @@ export function explain(signals: S[], level: string, score: number, chipVerified
     rec = "REJECT"; text = `Face evidence is conclusive (${faceFail[0].label.toLowerCase()}: ${faceFail[0].value}). Reject.`;
   } else if ((fails.length && fails.some((s) => ["PAD", "CLASSIFICATION", "CHIP"].includes(s.grp))) || signals.some((s) => s.label === "Previous fraud history" && fired(s))) {
     rec = "REJECT"; text = "Attack or document evidence is conclusive. Reject and flag the document.";
-  } else if (level === "HIGH" && [...groups].every((g) => ["DEVICE", "SERVER", "BEHAVIOUR"].includes(g))) {
-    rec = "ESCALATE"; text = "The document looks genuine but the capture channel is not trusted. Escalate to a specialist.";
+  } else if (level === "HIGH") {
+    rec = "INVITE_BRANCH"; text = "Confidence is too low for remote approval. Invite the applicant to a branch visit (appealable). Analysts may still reject after review.";
   } else if (level === "LOW") {
     rec = "APPROVE"; text = "All decisive checks passed. Approve.";
   } else {
     const faceDoubt = signals.some((s) => s.grp === "FACE" && fired(s) && s.risk_points);
     const target = chipExpected === "REQUIRED" && !chipVerified ? "a chip read" : faceDoubt ? "an active liveness check (random head gestures)" : "a second capture on a trusted device";
-    rec = "REQUEST_VERIFICATION"; text = `Evidence is mixed. Request ${target} before deciding.`;
+    rec = "REQUEST_VERIFICATION"; text = `Evidence is mixed. Request ${target} or complete online review before deciding.`;
   }
   const edge = Math.min(Math.abs(score - 25), Math.abs(score - 60));
   let conf = 0.55 + Math.min(0.35, edge / 100) + (chipVerified ? 0.05 : 0) - (f.length > 4 ? 0.05 : 0);

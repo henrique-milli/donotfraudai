@@ -3,7 +3,8 @@
  * the raw signals plus what only the server can know (verification results, history).
  *   score = sum over groups of min(sum of fired risk points in group, group cap), capped at 100
  *   level = LOW < 25 <= MEDIUM < 60 <= HIGH;  any FAIL in a hard-stop group -> HIGH
- *   route = LOW -> CONTINUE, MEDIUM -> STEP_UP, HIGH -> MANUAL_REVIEW
+ *   route = LOW -> CONTINUE, MEDIUM -> MANUAL_REVIEW, HIGH -> BRANCH_VISIT
+ *   (no auto-deny; analysts may still REJECT after review)
  */
 import { policy } from "./policy.ts";
 import type { Verification } from "./attestation.ts";

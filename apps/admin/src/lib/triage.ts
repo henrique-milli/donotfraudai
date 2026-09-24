@@ -204,20 +204,23 @@ export const REC: Record<string, string> = {
   APPROVE: "Approve",
   REQUEST_VERIFICATION: "Request verification",
   ESCALATE: "Escalate",
+  INVITE_BRANCH: "Invite to branch",
   REJECT: "Reject",
 };
 export const STATUS: Record<string, string> = {
   AUTO_APPROVED: "Auto-approved",
   STEP_UP_REQUESTED: "Step-up requested",
   IN_TRIAGE: "In triage",
+  BRANCH_INVITED: "Branch visit invited",
   ESCALATED: "Escalated",
   APPROVED: "Approved",
   REJECTED: "Rejected",
 };
 export const ROUTE: Record<string, string> = {
-  CONTINUE: "Continue onboarding",
+  CONTINUE: "Auto-approved",
+  MANUAL_REVIEW: "Online review",
+  BRANCH_VISIT: "Branch visit",
   STEP_UP: "Step-up verification",
-  MANUAL_REVIEW: "Manual review",
 };
 
 export function ago(iso: string) {

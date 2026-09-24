@@ -31,7 +31,8 @@ and `localhost:8000/api/v1/sessions` hit the same route.
    photo (else the printed portrait), printed vs chip photo, 1:N face clusters across documents.
 
 Score = per-group capped sum of fired risk points; any FAIL in a hard-stop group → HIGH.
-LOW → continue, MEDIUM → active liveness, HIGH → manual review. Policy values: `_shared/policy.ts`.
+LOW → CONTINUE (auto-approve), MEDIUM → MANUAL_REVIEW, HIGH → BRANCH_VISIT (no auto-deny).
+Policy values: `_shared/policy.ts`. Analysts may still REJECT after review.
 Every step is appended to a SHA-256 hash chain (`attest.audit_events`, append-only by trigger).
 
 ## Secrets

@@ -23,8 +23,8 @@ supabase/       Postgres (+pgvector), Storage, the attest Edge Function
 phone ── POST /v1/challenges ─────────────► single-use challenge
 phone: hardware-attested key bound to it · scan front/back · chip read when the card has one · selfie
 phone ── POST /v1/sessions {sealed} ─────► verify signature + attestation chain · face 1:1/1:N/liveness
-                                            · faceswap/deepfake · score · route: CONTINUE / STEP_UP / MANUAL_REVIEW
-phone ── POST /v1/sessions/:id/next ─────► NONE | ACTIVE_LIVENESS {random gestures}
+                                            · faceswap/deepfake · score · route: CONTINUE / MANUAL_REVIEW / BRANCH_VISIT
+phone ── POST /v1/sessions/:id/next ─────► NONE | ACTIVE_LIVENESS {random gestures}  (analyst step-up)
 analyst ── /triage ──────────────────────► queue · signals · images · recommendation · decision · audit
 ```
 
@@ -50,7 +50,7 @@ Neither private schema is exposed through the Data API; only the edge function r
 | **One face, many documents** (mules, synthetic identities) | One fraudster opens many accounts | 1:N over live selfies clusters faces across sessions. The console shows how many documents each face has tried, and flags a document already presented by a different face |
 | **Emulator, rooted phone, hooking, injected camera** | Everything above is bypassed at the source | Hardware key attestation (StrongBox/TEE, verified boot, lock state, app identity), re-parsed on the server from the certificate chain. Root, hook, emulator and debugger checks, plus a boot-state consistency check (OS properties vs attested boot) |
 | **Tampered or replayed payload** | Forged signals reach the backend | Payload signed by the attested key over a single-use server challenge, sealed with ECDH-ES P-256 + AES-256-GCM. The server rescores from raw signals; the phone's own score is advisory |
-| **Oracle probing**: retrying until the checks pass | The attacker learns the thresholds | The phone only learns a route (continue / step-up / review), never scores or reasons. Release builds collect silently, and the verbose presenter view is compiled out |
+| **Oracle probing**: retrying until the checks pass | The attacker learns the thresholds | The phone only learns a route (auto-approve / online review / branch visit), never scores or reasons. Release builds collect silently, and the verbose presenter view is compiled out |
 
 The analyst sees the evidence, a rule-based recommendation with "why not approve / why not reject", and a decision bar. Every step is written to a hash-chained, append-only audit trail.
 

@@ -138,7 +138,7 @@ object Payload {
         /** security level of the key that signed the payload, or null if unsigned */
         val signedBy: String?,
         val delivery: String,
-        /** CONTINUE / STEP_UP / MANUAL_REVIEW from the backend, null when not delivered */
+        /** CONTINUE / MANUAL_REVIEW / BRANCH_VISIT from the backend, null when not delivered */
         val route: String?,
     )
 
@@ -204,7 +204,7 @@ object Payload {
         return Sealed(file, payload.length, envelope.length, att?.parsed?.securityLevelName?.takeIf { sig != null }, delivery, route)
     }
 
-    /** The backend answers with the route only (CONTINUE / STEP_UP / MANUAL_REVIEW), never reasons. */
+    /** The backend answers with the route only (CONTINUE / MANUAL_REVIEW / BRANCH_VISIT), never reasons. */
     private fun upload(envelope: String): Pair<String, String?> = runCatching {
         val c = URL("${BuildConfig.BACKEND_BASE}/sessions").openConnection() as HttpURLConnection
         c.requestMethod = "POST"; c.doOutput = true; c.connectTimeout = 8000; c.readTimeout = 30000
