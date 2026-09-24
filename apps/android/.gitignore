@@ -1,0 +1,8 @@
+# Android / Gradle
+.gradle/
+build/
+.cxx/
+local.properties
+captures/
+*.apk
+*.aab

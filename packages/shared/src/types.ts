@@ -1,49 +1,46 @@
-export type SessionStatus =
-  | "pending"
-  | "auto_pass"
-  | "auto_fail"
-  | "needs_review"
-  | "approved"
-  | "rejected";
+// attest API (supabase/functions/attest): what the phone and the console exchange
 
-export type EvidenceKind = "selfie" | "id_document" | "device_attestation";
+/** The only thing the phone learns about its session: never the score or the reasons. */
+export type AttestRoute = "CONTINUE" | "STEP_UP" | "MANUAL_REVIEW";
+export type AttestLevel = "LOW" | "MEDIUM" | "HIGH";
+export type AttestCaseStatus =
+  | "AUTO_APPROVED"
+  | "STEP_UP_REQUESTED"
+  | "IN_TRIAGE"
+  | "ESCALATED"
+  | "APPROVED"
+  | "REJECTED";
+export type AttestAction = "APPROVE" | "REQUEST_VERIFICATION" | "ESCALATE" | "REJECT";
+export type SignalGroup =
+  | "PAD"
+  | "FACE"
+  | "CLASSIFICATION"
+  | "CONSISTENCY"
+  | "CHIP"
+  | "DEVICE"
+  | "SERVER"
+  | "BEHAVIOUR"
+  | "QUALITY";
 
-export type ReviewDecision = "approve" | "reject" | "request_more";
-
-export interface VerificationSession {
-  id: string;
-  subjectRef: string;
-  purpose: "onboarding" | "account_recovery";
-  status: SessionStatus;
-  createdAt: string;
+/** POST /v1/sessions body: ECDH-ES-P256 + HKDF-SHA256 + AES-256-GCM over {payload, sig}. */
+export interface SealedEnvelope {
+  v: 1;
+  alg: "ECDH-ES-P256+HKDF-SHA256+A256GCM";
+  kid: string;
+  session?: string;
+  epk: string;
+  iv: string;
+  ct: string;
 }
 
-export interface Evidence {
-  id: string;
-  sessionId: string;
-  kind: EvidenceKind;
-  storagePath: string | null;
-  meta: Record<string, unknown>;
-}
-
-export interface VisionAnalysis {
-  livenessScore: number;
-  deepfakeScore: number;
-  injectionLikely: boolean;
-  artifacts: string[];
-  model: string;
-}
-
-export interface RiskScore {
-  score: number;
-  decision: "allow" | "review" | "deny";
-  signals: Record<string, number | boolean | string>;
-  model: string;
-}
+/** POST /v1/sessions/:id/next → what the phone must do next. */
+export type NextAction =
+  | { action: "NONE" }
+  | { action: "ACTIVE_LIVENESS"; reverification: number; steps: ("TURN_LEFT" | "TURN_RIGHT" | "TILT_LEFT" | "TILT_RIGHT")[]; expiresAt: string };
 
 export interface HealthStatus {
   service: string;
   ok: boolean;
-  version: string;
+  version?: string;
   time: string;
 }

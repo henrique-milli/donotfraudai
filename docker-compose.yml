@@ -1,20 +1,54 @@
-# Optional. `pnpm dev` already runs these on the host with hot reload.
-# Use compose when you want the models isolated from the laptop Python.
+# Optional. `pnpm dev` runs the face service on the host with hot reload; compose runs it isolated.
 services:
-  vision:
-    image: ghcr.io/astral-sh/uv:python3.12-bookworm
-    working_dir: /app
-    volumes:
-      - ./services/vision:/app
+  # Face service with the open-source models baked in (first build downloads + converts them).
+  # Gallery: SQLite in a volume; set FACE_GALLERY_DSN to use pgvector (schema `face`) instead.
+  face:
+    build: ./services/face
     ports:
-      - "8001:8001"
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+      - "8003:8003"
+    environment:
+      FACE_SERVICE_TOKEN: ${FACE_SERVICE_TOKEN:-}
+      FACE_GALLERY_DSN: ${FACE_GALLERY_DSN:-}
+    volumes:
+      - face-data:/data
 
-  risk:
-    image: ghcr.io/astral-sh/uv:python3.12-bookworm
-    working_dir: /app
-    volumes:
-      - ./services/risk:/app
+  # --- `docker compose --profile standalone up`: the attest API without the Supabase CLI
+  # (plain Postgres + pgvector, same migrations, images stored in the database).
+  attest-db:
+    profiles: [standalone]
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "8002:8002"
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+      - "127.0.0.1:54399:5432"
+    volumes:
+      - attest-db:/var/lib/postgresql/data
+      - ./supabase/local/00_bootstrap.sql:/docker-entrypoint-initdb.d/00_bootstrap.sql:ro
+      - ./supabase/migrations/20260924121000_attest_private_schemas.sql:/docker-entrypoint-initdb.d/10_schemas.sql:ro
+      - ./supabase/migrations/20260924130000_attest_tables.sql:/docker-entrypoint-initdb.d/20_tables.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 3s
+      retries: 20
+
+  attest-api:
+    profiles: [standalone]
+    image: denoland/deno:2.1.4
+    working_dir: /functions/attest
+    command: deno run --frozen --allow-net --allow-env --allow-read index.ts
+    env_file: ./supabase/functions/.env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@attest-db:5432/postgres
+      ATTEST_IMAGES_IN_DB: "1"
+      FACE_SERVICE_URL: http://face:8003
+    volumes:
+      - ./supabase/functions:/functions:ro
+    ports:
+      - "${ATTEST_API_PORT:-8000}:8000"
+    depends_on:
+      attest-db:
+        condition: service_healthy
+
+volumes:
+  face-data:
+  attest-db:
