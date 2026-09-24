@@ -109,6 +109,7 @@ def analyze(body: AnalyzeIn):
         p = fe.probe(e, name, data, liveness=name in body.liveness)
         out[name] = {
             "faces": p.faces,
+            "size": list(p.size) if p.size else None,
             "face": None if p.face is None else {
                 "box": [float(x) for x in p.face.box], "landmarks": p.face.landmarks.round(2).tolist(),
                 "score": p.face.score, "yaw": fe.Engine.yaw(p.face), "roll": fe.Engine.roll(p.face),

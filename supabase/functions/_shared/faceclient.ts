@@ -52,7 +52,8 @@ export async function analyze(images: Record<string, Uint8Array>, liveness: stri
   for (const [k, r] of Object.entries(res)) {
     const f = r.face ?? {};
     out[k] = { kind: k, faces: r.faces, score: f.score ?? null, yaw: f.yaw ?? null, roll: f.roll ?? null,
-      area: Array.isArray(f.box) ? f.box[2] * f.box[3] : null,
+      // face area as a fraction of the image: frames are sent at different resolutions
+      area: Array.isArray(f.box) && Array.isArray(r.size) ? (f.box[2] * f.box[3]) / (r.size[0] * r.size[1]) : null,
       embedding: emb(r.embedding), live: r.liveness ?? null };
   }
   return out;

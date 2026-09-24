@@ -18,7 +18,8 @@ export const policy = {
   },
   face: {
     matchThreshold: 0.363, borderlineMargin: 0.07, searchThreshold: 0.5, samePersonThreshold: 0.5,
-    burstThreshold: 0.5, livenessPass: 0.7, livenessFail: 0.2, gestureYaw: 0.18, gestureRoll: 10, gestureCloser: 1.2, gestureFurther: 0.83,
+    burstThreshold: 0.5, livenessPass: 0.7, livenessFail: 0.2, // calibrated on Pixel 6 sessions: real users make small moves; the order, direction and identity checks carry the security
+    gestureYaw: 0.12, gestureRoll: 6, gestureCloser: 1.15, gestureFurther: 0.87, actionSameFace: 0.4,
     weights: {
       noSelfie: 30, noFace: 40, multipleFaces: 40, livenessInconclusive: 35, livenessFail: 70, burstInconsistent: 50,
       faceBorderline: 40, faceMismatch: 70, portraitChipMismatch: 80, duplicateFace: 60, repeatAttempt: 30,

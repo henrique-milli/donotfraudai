@@ -67,7 +67,8 @@ class SelfieActivity : AppCompatActivity() {
         private const val READY_STREAK = 3
         private const val GESTURE_STREAK = 2
         private const val HINT_HOLD_MS = 900L
-        private const val STEP_TIMEOUT_MS = 15_000L   // no dead end: the frame is sent and the server judges it
+        private const val STEP_TIMEOUT_MS = 15_000L   // no dead end: the best frame is sent and the server judges it
+        private const val PEAK_MS = 600L              // keep watching after detection and send the frame at the peak
         private const val CLOSER = 1.3                // face area vs the neutral selfie (server accepts ≥ 1.2)
         private const val FURTHER = 0.75              // (server accepts ≤ 0.83)
 
@@ -87,6 +88,10 @@ class SelfieActivity : AppCompatActivity() {
     @Volatile private var challengeId: String? = null
     private var neutralArea = 0.0
     private val stepOk = ArrayList<Boolean>()
+    // per action: strongest frame seen so far, and when the action was first detected
+    private var best: Bitmap? = null
+    private var bestStrength = Double.NEGATIVE_INFINITY
+    private var detectedAt = 0L
 
     // capture state (worker thread)
     @Volatile private var phase = Phase.NEUTRAL
@@ -189,9 +194,9 @@ class SelfieActivity : AppCompatActivity() {
             when (phase) {
                 Phase.NEUTRAL -> neutral(o) { selfie = Frames.toBitmap(mat); neutralArea = o.areaPct }
                 Phase.WAIT -> if (steps.isNotEmpty()) startGestures()
-                Phase.GESTURE -> gesture(o) { frames += Frames.toBitmap(mat) }
+                Phase.GESTURE -> gesture(o) { Frames.toBitmap(mat) }
                 Phase.RETURN -> if (o.faces == 1 && o.lookLeftRight <= 0.5 && o.tilt <= 0.3 && o.position != Position.TOO_CLOSE && o.position != Position.TOO_FAR) {
-                    phase = Phase.GESTURE; stepStartedAt = SystemClock.elapsedRealtime(); streak = 0
+                    phase = Phase.GESTURE; beginStep()
                     ui { showGesture() }
                 } else ui { b.hint.text = getString(R.string.gesture_back_neutral) }
                 Phase.DONE -> Unit
@@ -223,8 +228,23 @@ class SelfieActivity : AppCompatActivity() {
     }
 
     private fun startGestures() {
-        phase = Phase.GESTURE; stepIndex = 0; stepStartedAt = SystemClock.elapsedRealtime()
+        phase = Phase.GESTURE; stepIndex = 0
+        beginStep()
         ui { showGesture() }
+    }
+
+    private fun beginStep() {
+        stepStartedAt = SystemClock.elapsedRealtime(); streak = 0
+        best = null; bestStrength = Double.NEGATIVE_INFINITY; detectedAt = 0L
+    }
+
+    /** How far into the action this frame is, in the face module's own units (higher = more). */
+    private fun strength(g: Gesture, o: Observation): Double = when (g) {
+        Gesture.TURN_LEFT, Gesture.TURN_RIGHT -> o.lookLeftRight
+        Gesture.TILT_LEFT -> o.tiltedLeft
+        Gesture.TILT_RIGHT -> o.tiltedRight
+        Gesture.MOVE_CLOSER -> if (neutralArea > 0) o.areaPct / neutralArea else 0.0
+        Gesture.MOVE_FURTHER -> if (o.areaPct > 0) neutralArea / o.areaPct else 0.0
     }
 
     /** Closer / further are judged against the neutral selfie, with margin over the server's thresholds. */
@@ -234,14 +254,31 @@ class SelfieActivity : AppCompatActivity() {
         else -> FaceEngine.performed(g, o)
     }
 
-    private fun gesture(o: Observation, grab: () -> Unit) {
+    /**
+     * The frame sent for an action is the one where the move peaks: after the action is detected the
+     * phone keeps watching for [PEAK_MS] and keeps the strongest frame. On a timeout it sends the
+     * strongest frame of the whole attempt, so a move the phone missed can still be judged by the server.
+     */
+    private fun gesture(o: Observation, grab: () -> Bitmap) {
         val g = steps[stepIndex]
-        if (performed(g, o)) streak++ else streak = 0
-        val timedOut = SystemClock.elapsedRealtime() - stepStartedAt > STEP_TIMEOUT_MS
-        if (streak < GESTURE_STREAK && !timedOut) return
-        grab()
-        stepOk += streak >= GESTURE_STREAK
-        stepTimes += SystemClock.elapsedRealtime() - stepStartedAt
+        val now = SystemClock.elapsedRealtime()
+        val ok = performed(g, o)
+        if (ok) streak++ else streak = 0
+        if (streak >= GESTURE_STREAK && detectedAt == 0L) {
+            // from here on only frames where this action (not its opposite) registers can be the peak
+            detectedAt = now; best = null; bestStrength = Double.NEGATIVE_INFINITY
+            ui { b.hint.text = getString(R.string.gesture_hold) }
+        }
+        if (o.faces == 1 && (ok || detectedAt == 0L)) {
+            val st = strength(g, o)
+            if (st > bestStrength) { bestStrength = st; best = grab() }
+        }
+        val peaked = detectedAt > 0 && now - detectedAt >= PEAK_MS
+        val timedOut = now - stepStartedAt > STEP_TIMEOUT_MS
+        if (!peaked && !timedOut) return
+        frames += best ?: grab()
+        stepOk += detectedAt > 0
+        stepTimes += now - stepStartedAt
         streak = 0
         stepIndex++
         ui { b.oval.progress = stepIndex / steps.size.toFloat() }

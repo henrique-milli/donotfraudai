@@ -5,9 +5,10 @@
  */
 import { assert, assertEquals } from "jsr:@std/assert@1";
 
-// test "JPEG": ff d8 ff | person | yaw+100 (hundredths of an eye distance) | roll+100 (degrees) | face size
-const img = (person: number, yaw = 0, roll = 0, size = 100) =>
-  btoa(String.fromCharCode(0xff, 0xd8, 0xff, person, yaw + 100, roll + 100, size, 1));
+// test "JPEG": ff d8 ff | person | yaw+100 (hundredths of an eye distance) | roll+100 (degrees) | face size px
+// | image width / 10 (square image)
+const img = (person: number, yaw = 0, roll = 0, size = 100, width = 72) =>
+  btoa(String.fromCharCode(0xff, 0xd8, 0xff, person, yaw + 100, roll + 100, size, width));
 const b64f = (v: Float32Array) => btoa(String.fromCharCode(...new Uint8Array(v.buffer)));
 
 const face = Deno.serve({ port: 0, onListen: () => {} }, async (req) => {
@@ -16,7 +17,7 @@ const face = Deno.serve({ port: 0, onListen: () => {} }, async (req) => {
     const results = Object.fromEntries(Object.entries(b.images as Record<string, string>).map(([k, v]) => {
       const x = Uint8Array.from(atob(v), (c) => c.charCodeAt(0));
       const e = new Float32Array(128); e[x[3] % 128] = 1;
-      return [k, { faces: 1, face: { score: 0.9, yaw: (x[4] - 100) / 100, roll: x[5] - 100, box: [0, 0, x[6], x[6]] },
+      return [k, { faces: 1, face: { score: 0.9, yaw: (x[4] - 100) / 100, roll: x[5] - 100, box: [0, 0, x[6], x[6]] }, size: [x[7] * 10, x[7] * 10],
         embedding: b64f(e), liveness: b.liveness.includes(k) ? 0.95 : null }];
     }));
     return Response.json({ results });
@@ -43,11 +44,11 @@ const performed: Record<string, [number, number, number]> = {
 };
 
 let n = 0;
-function session(steps: string[], challenge?: string, frames = steps.map((s) => performed[s])) {
+function session(steps: string[], challenge?: string, frames: number[][] = steps.map((s) => performed[s])) {
   const p: any = payload("face-challenge", { holder: ["EVA", "TEST", `Z${String(++n).padStart(7, "0")}`], signals: [], chip: ["UNKNOWN", false] });
   p.face = { mode: "ACTIVE", challenge, gestures: steps.map((g, i) => ({ gesture: g, frame: `active${i + 1}` })) };
   p.images = { selfie: { b64: img(40 + n) } };
-  frames.forEach(([y, r, s], i) => (p.images[`active${i + 1}`] = { b64: img(40 + n, y, r, s) }));
+  frames.forEach(([y, r, s, wd], i) => (p.images[`active${i + 1}`] = { b64: img(40 + n, y, r, s, wd) }));
   return p;
 }
 const ingest = async (p: unknown) => {
@@ -75,6 +76,15 @@ Deno.test({ name: "performed as issued → challenge and actions pass", ...opts,
   assertEquals(f["Face challenge"].outcome, "PASS");
   assertEquals(f["Active liveness gestures"].outcome, "PASS", f["Active liveness gestures"].value);
   assertEquals(f["Same face across actions"].outcome, "PASS");
+} });
+
+Deno.test({ name: "closer / further judged on face size relative to the image, not pixels", ...opts, fn: async () => {
+  // the app sends the selfie at 720 px and action frames at 480 px: a real ×1.3 move closer is only
+  // ×0.58 in raw pixels (the Pixel 6 bug), and must still pass
+  const steps = ["TURN_LEFT", "MOVE_CLOSER", "MOVE_FURTHER"];
+  const [row] = await sql`insert into attest.face_challenges (id, steps, expires_at) values ('res-mix', ${sql.json(steps)}, now() + interval '3 minutes') returning id`;
+  const f = await ingest(session(steps, row.id, [[-30, 0, 67, 48], [0, 0, 76, 48], [0, 0, 62, 48]]));
+  assertEquals(f["Active liveness gestures"].outcome, "PASS", f["Active liveness gestures"].value);
 } });
 
 Deno.test({ name: "replayed capture (challenge reused) fails", ...opts, fn: async () => {

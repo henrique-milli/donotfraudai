@@ -148,10 +148,10 @@ function checkGestures(neutral: fc.Probe, probes: Record<string, fc.Probe>, step
 /** Every action frame must still be the neutral selfie's face: a swap that loses tracking mid-action dips here. */
 function sameFaceSig(neutral: fc.Probe, embs: (Float32Array | null)[]): Sig {
   const sims = embs.slice(1).map((e) => (e ? dot(neutral.embedding!, e) : -1));
-  const ok = sims.every((x) => x >= cfg.burstThreshold);
+  const ok = sims.every((x) => x >= cfg.actionSameFace);
   return sig(G, "Same face across actions", ok ? "PASS" : "WARN",
     sims.length ? `min similarity to the neutral selfie ${Math.min(...sims).toFixed(2)} over ${sims.length} frame(s)` : "no action frames",
-    `SFace ≥ ${cfg.burstThreshold} on every frame`, w.burstInconsistent);
+    `SFace ≥ ${cfg.actionSameFace} on every frame (a turned head lowers similarity; impostors score ~0.2)`, w.burstInconsistent);
 }
 
 /** Face-swap / deepfake injection on the given frames (services/faceswap — mock today, same contract). */

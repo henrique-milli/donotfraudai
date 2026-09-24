@@ -159,17 +159,19 @@ class Probe:
     face: Face | None = None
     embedding: np.ndarray | None = None
     live: float | None = None
+    size: tuple[int, int] | None = None        # decoded image width, height
 
 
 def probe(engine: Engine, kind: str, data: bytes, liveness: bool = False) -> Probe:
     img = engine.decode(data)
     if img is None:
         return Probe(kind, 0)
+    size = (int(img.shape[1]), int(img.shape[0]))
     faces = engine.detect(img)
     if not faces:
-        return Probe(kind, 0)
+        return Probe(kind, 0, size=size)
     f = faces[0]
-    return Probe(kind, len(faces), f, engine.embed(img, f), engine.liveness(img, f) if liveness else None)
+    return Probe(kind, len(faces), f, engine.embed(img, f), engine.liveness(img, f) if liveness else None, size)
 
 
 def to_b64(v: np.ndarray) -> str:
