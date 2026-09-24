@@ -76,6 +76,8 @@
     <string name="selfie_hint_hold">Hold still…</string>
     <string name="selfie_hint_done">Done</string>
     <string name="selfie_active_intro">Follow the instructions on screen</string>
+    <string name="selfie_actions_intro">Look at the camera, then do 3 quick moves</string>
+    <string name="selfie_actions_wait">Preparing your moves…</string>
     <string name="gesture_TURN_LEFT">← Turn your head left</string>
     <string name="gesture_TURN_RIGHT">Turn your head right →</string>
     <string name="gesture_TILT_LEFT">↖ Tilt your head left</string>

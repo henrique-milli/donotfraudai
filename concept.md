@@ -29,7 +29,7 @@ The dynamic part is the **route after that score** — auto-approval that skips 
 2. **Document photos.** The user photographs the ID. We check quality, tampering, and overall reliability, then pick one of two alternatives:
   - **NFC chip (preferred).** If the ID has a chip, the user taps it. A valid chip proves they hold a real, untampered ID.
   - **Document agent (fallback).** If NFC is missing or fails, an agent runs extensive online lookups to raise confidence instead.
-3. **Face scan.** The user submits a live selfie (and short burst). When the score still needs proof of human, they are asked to do something that cannot be filmed in advance (**PoH** — randomized challenges). We check:
+3. **Face scan.** The user takes a live selfie and then performs 3 randomized actions the server issues at that moment (always one head turn), something that cannot be filmed in advance (**PoH**). If the score still needs proof after that, step-up asks for a second, new sequence. We check:
   - Tampering: live face-swap / deepfake injection.
   - Face matches the document.
   - Biometric uniqueness: this face is not already enrolled under another identity (**PoU**).

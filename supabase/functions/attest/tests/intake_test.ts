@@ -43,6 +43,7 @@ const { sql } = await import("../../_shared/db.ts");
 const intake = await import("../../_shared/intake.ts");
 const { verifyChain } = await import("../../_shared/audit.ts");
 const { payload, SCENARIOS } = await import("../tools/fixtures.ts");
+const { policy } = await import("../../_shared/policy.ts");
 
 // a JPEG header followed by a "person" byte
 const jpeg = (person: number) => btoa(String.fromCharCode(0xff, 0xd8, 0xff, person, 1, 2, 3));
@@ -93,7 +94,8 @@ Deno.test({ name: "1:N links one face across two documents; decisions are audite
   assertEquals(await intake.caseForToken(sql, b.case.session_id, "wrong"), null);
   const [rv] = await sql`select status, steps from attest.reverifications where case_id = ${b.case.id}`;
   assertEquals(rv.status, "PENDING");
-  assertEquals(rv.steps.length, 2);
+  assertEquals(rv.steps.length, policy.activeLiveness.steps);
+  assert(rv.steps.some((g: string) => g.startsWith("TURN")), "always one head turn");
   assert((await verifyChain(sql)).ok);
   await sql.end();
   await face.shutdown();

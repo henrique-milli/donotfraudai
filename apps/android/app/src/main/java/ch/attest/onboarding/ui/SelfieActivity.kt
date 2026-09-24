@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import ch.attest.onboarding.R
 import ch.attest.onboarding.core.Check
 import ch.attest.onboarding.core.FaceCapture
+import ch.attest.onboarding.core.FaceChallenge
 import ch.attest.onboarding.core.Group
 import ch.attest.onboarding.core.Mode
 import ch.attest.onboarding.core.Outcome
@@ -45,13 +46,14 @@ import kotlin.math.min
 /**
  * Selfie capture on the front camera, analysed on device by the face engine.
  *
- *  PASSIVE (default): the applicant just looks at the phone. Once the capture gate passes on
- *  consecutive frames, a selfie plus a short burst of frames is taken; the backend decides liveness
- *  (anti-spoofing on every frame) and matches the face 1:1 and 1:N.
+ *  Every capture is ACTIVE: a neutral selfie, then a random sequence of actions (always one head turn)
+ *  that the backend issues at this moment (POST /face-challenges), one frame per action. Nothing can be
+ *  recorded in advance, and a live face swap has to hold up while the head turns, tilts and moves. The
+ *  phone checks each action only to guide the user; the backend re-measures every frame itself, runs
+ *  anti-spoofing and the face-swap check on all of them, and matches the face 1:1 and 1:N.
  *
- *  ACTIVE (only when the backend asks, i.e. re-verification): a neutral selfie, then the random
- *  gesture sequence the backend issued, one frame per gesture. The phone checks each gesture to
- *  guide the user; the backend re-checks every frame itself.
+ *  Re-verification (the backend asked for a step-up): same flow, with the sequence the backend attached
+ *  to the request, sealed and sent straight away.
  */
 class SelfieActivity : AppCompatActivity() {
 
@@ -64,22 +66,27 @@ class SelfieActivity : AppCompatActivity() {
         const val EXTRA_STEPS = "steps"
         private const val READY_STREAK = 3
         private const val GESTURE_STREAK = 2
-        private const val BURST = 4
         private const val HINT_HOLD_MS = 900L
+        private const val STEP_TIMEOUT_MS = 15_000L   // no dead end: the frame is sent and the server judges it
+        private const val CLOSER = 1.3                // face area vs the neutral selfie (server accepts ≥ 1.2)
+        private const val FURTHER = 0.75              // (server accepts ≤ 0.83)
 
         fun active(ctx: Context, p: Payload.Pending) = Intent(ctx, SelfieActivity::class.java)
             .putExtra(EXTRA_MODE, "ACTIVE").putExtra(EXTRA_PARENT, p.parentSession).putExtra(EXTRA_TOKEN, p.token)
             .putExtra(EXTRA_RV, p.number).putExtra(EXTRA_STEPS, p.steps.toTypedArray())
     }
 
-    private enum class Phase { NEUTRAL, BURST, GESTURE, RETURN, DONE }
+    private enum class Phase { NEUTRAL, WAIT, GESTURE, RETURN, DONE }
 
     private lateinit var b: ActivitySelfieBinding
     private val stage get() = Mode.stage
     private val onMode: (Boolean) -> Unit = { runOnUiThread { applyMode() } }
     private val worker: ExecutorService = Executors.newSingleThreadExecutor()
-    private var active = false
-    private var steps: List<Gesture> = emptyList()
+    private var reverify = false
+    @Volatile private var steps: List<Gesture> = emptyList()
+    @Volatile private var challengeId: String? = null
+    private var neutralArea = 0.0
+    private val stepOk = ArrayList<Boolean>()
 
     // capture state (worker thread)
     @Volatile private var phase = Phase.NEUTRAL
@@ -102,17 +109,27 @@ class SelfieActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivitySelfieBinding.inflate(layoutInflater)
         setContentView(b.root)
-        active = intent.getStringExtra(EXTRA_MODE) == "ACTIVE"
-        steps = intent.getStringArrayExtra(EXTRA_STEPS)?.mapNotNull { runCatching { Gesture.valueOf(it) }.getOrNull() }.orEmpty()
+        reverify = intent.getStringExtra(EXTRA_MODE) == "ACTIVE"
+        if (reverify) {
+            steps = intent.getStringArrayExtra(EXTRA_STEPS)?.mapNotNull { runCatching { Gesture.valueOf(it) }.getOrNull() }.orEmpty()
+        } else {
+            // issued now, while the camera opens: the sequence did not exist before this moment
+            Thread {
+                val c = FaceChallenge.fetch()
+                challengeId = c.id
+                steps = c.steps.mapNotNull { runCatching { Gesture.valueOf(it) }.getOrNull() }
+                ui { if (stage) b.hudTitle.text = hudTitle() }
+            }.start()
+        }
 
-        b.stepBar.steps = if (active) 1 else 4
-        b.stepBar.current = if (active) 0 else 3
-        b.title.text = getString(if (active) R.string.selfie_active_title else R.string.selfie_title)
-        b.hint.text = getString(if (active) R.string.selfie_active_intro else R.string.selfie_hint_loading)
+        b.stepBar.steps = if (reverify) 1 else 4
+        b.stepBar.current = if (reverify) 0 else 3
+        b.title.text = getString(if (reverify) R.string.selfie_active_title else R.string.selfie_title)
+        b.hint.text = getString(if (reverify) R.string.selfie_active_intro else R.string.selfie_actions_intro)
         b.btnBack.setOnClickListener { finish() }
         b.btnBack.marginForSystemBars(top = true)
         b.hud.marginForSystemBars(bottom = true)
-        b.hudTitle.text = if (active) "Face capture · active · ${steps.joinToString { it.name.lowercase() }}" else "Face capture · passive"
+        b.hudTitle.text = hudTitle()
         b.btnMode.visibility = if (Mode.available) View.VISIBLE else View.GONE
         b.btnMode.setOnClickListener { Mode.toggle(this) }
         Mode.observe(onMode)
@@ -120,6 +137,9 @@ class SelfieActivity : AppCompatActivity() {
         startedAt = SystemClock.elapsedRealtime()
         startCamera()
     }
+
+    private fun hudTitle() = "Face capture · active · " + (if (steps.isEmpty()) "waiting for challenge" else
+        steps.joinToString(" → ") { it.name.lowercase().replace('_', ' ') }) + if (!reverify && challengeId == null && steps.isNotEmpty()) " (offline)" else ""
 
     private fun applyMode() {
         b.btnMode.setImageResource(if (stage) R.drawable.ic_eye else R.drawable.ic_eye_off)
@@ -167,12 +187,8 @@ class SelfieActivity : AppCompatActivity() {
             val o = FaceEngine.analyze(mat)
             if (o.ready && o.faces == 1) observations += o
             when (phase) {
-                Phase.NEUTRAL -> neutral(o) { selfie = Frames.toBitmap(mat) }
-                Phase.BURST -> if (o.faces == 1) {
-                    frames += Frames.toBitmap(mat)
-                    ui { b.oval.progress = frames.size / BURST.toFloat() }
-                    if (frames.size >= BURST) finishCapture()
-                }
+                Phase.NEUTRAL -> neutral(o) { selfie = Frames.toBitmap(mat); neutralArea = o.areaPct }
+                Phase.WAIT -> if (steps.isNotEmpty()) startGestures()
                 Phase.GESTURE -> gesture(o) { frames += Frames.toBitmap(mat) }
                 Phase.RETURN -> if (o.faces == 1 && o.lookLeftRight <= 0.5 && o.tilt <= 0.3 && o.position != Position.TOO_CLOSE && o.position != Position.TOO_FAR) {
                     phase = Phase.GESTURE; stepStartedAt = SystemClock.elapsedRealtime(); streak = 0
@@ -200,20 +216,31 @@ class SelfieActivity : AppCompatActivity() {
         if (streak < READY_STREAK) return
         grab()
         streak = 0
-        if (active && steps.isNotEmpty()) {
-            phase = Phase.GESTURE; stepIndex = 0; stepStartedAt = SystemClock.elapsedRealtime()
-            ui { showGesture() }
-        } else {
-            phase = Phase.BURST
-            ui { ovalState(FaceOvalView.State.CAPTURING) }
+        if (steps.isNotEmpty()) startGestures() else {
+            phase = Phase.WAIT
+            ui { b.hint.text = getString(R.string.selfie_actions_wait) }
         }
+    }
+
+    private fun startGestures() {
+        phase = Phase.GESTURE; stepIndex = 0; stepStartedAt = SystemClock.elapsedRealtime()
+        ui { showGesture() }
+    }
+
+    /** Closer / further are judged against the neutral selfie, with margin over the server's thresholds. */
+    private fun performed(g: Gesture, o: Observation): Boolean = when (g) {
+        Gesture.MOVE_CLOSER -> o.faces == 1 && neutralArea > 0 && o.areaPct >= neutralArea * CLOSER
+        Gesture.MOVE_FURTHER -> o.faces == 1 && neutralArea > 0 && o.areaPct <= neutralArea * FURTHER
+        else -> FaceEngine.performed(g, o)
     }
 
     private fun gesture(o: Observation, grab: () -> Unit) {
         val g = steps[stepIndex]
-        if (FaceEngine.performed(g, o)) streak++ else streak = 0
-        if (streak < GESTURE_STREAK) return
+        if (performed(g, o)) streak++ else streak = 0
+        val timedOut = SystemClock.elapsedRealtime() - stepStartedAt > STEP_TIMEOUT_MS
+        if (streak < GESTURE_STREAK && !timedOut) return
         grab()
+        stepOk += streak >= GESTURE_STREAK
         stepTimes += SystemClock.elapsedRealtime() - stepStartedAt
         streak = 0
         stepIndex++
@@ -256,16 +283,16 @@ class SelfieActivity : AppCompatActivity() {
         phase = Phase.DONE
         val shot = selfie ?: return
         val capture = FaceCapture(
-            mode = if (active) "ACTIVE" else "PASSIVE", selfie = shot, frames = frames.toList(),
-            gestures = if (active) steps.map { it.name } else emptyList(), checks = deviceChecks(),
+            mode = "ACTIVE", selfie = shot, frames = frames.toList(),
+            gestures = steps.map { it.name }, checks = deviceChecks(), challenge = if (reverify) null else challengeId,
         )
         ui {
             ovalState(FaceOvalView.State.DONE)
             b.oval.progress = 1f
             b.gesture.visibility = View.GONE
-            b.hint.text = getString(if (active) R.string.finishing else R.string.selfie_hint_done)
+            b.hint.text = getString(if (reverify) R.string.finishing else R.string.selfie_hint_done)
         }
-        if (!active) {
+        if (!reverify) {
             Session.face = capture
             ui {
                 b.root.postDelayed({
@@ -303,7 +330,7 @@ class SelfieActivity : AppCompatActivity() {
         out += Check(g, null, "Face capture gate", if (last?.clear == true) Outcome.PASS else Outcome.INFO,
             last?.let { "quality ${it.quality?.lowercase()} · face %.0f%% of frame · %d frames analysed".format(it.areaPct, obs.size) } ?: "no face",
             "one face, centred, sharp, eyes open, lit (face module gate)")
-        if (!active) {
+        run {
             val blink = obs.any { it.leftEyeOpen == false || it.rightEyeOpen == false }
             out += Check(g, null, "Natural blink", Outcome.INFO, if (blink) "seen during capture" else "not seen",
                 "weak liveness cue, recorded")
@@ -313,11 +340,13 @@ class SelfieActivity : AppCompatActivity() {
                 "a printed photo or a still screen does not move; recorded")
             out += Check(g, null, "Capture time", Outcome.INFO,
                 "%.1f s · selfie + %d frames".format((SystemClock.elapsedRealtime() - startedAt) / 1000.0, frames.size), "recorded")
-        } else {
-            out += Check(g, null, "Gestures on device", Outcome.PASS,
-                steps.zip(stepTimes).joinToString(" · ") { (s, t) -> "${s.name.lowercase().replace('_', ' ')} ✓ %.1f s".format(t / 1000.0) },
-                "random sequence issued by the backend; re-checked server-side")
         }
+        val all = stepOk.all { it }
+        out += Check(g, null, "Actions on device", if (all) Outcome.PASS else Outcome.WARN,
+            steps.indices.filter { it < stepTimes.size }.joinToString(" · ") { i ->
+                "${steps[i].name.lowercase().replace('_', ' ')} ${if (stepOk[i]) "✓" else "✗ timed out"} %.1f s".format(stepTimes[i] / 1000.0)
+            } + if (!reverify && challengeId == null) " · offline sequence" else "",
+            "random sequence issued by the backend at selfie time; re-measured server-side")
         return out
     }
 

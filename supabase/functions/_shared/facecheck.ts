@@ -2,15 +2,20 @@
  * Face signals for a session (passive) and for a re-verification (active). The models run in the face
  * microservice (faceclient.ts); this module is the policy: which comparisons, which thresholds, which risk.
  *
- * Session (passive, default):
+ * Session (active by default): the phone asks for a face challenge at selfie time and gets a random
+ *   sequence of actions (always one head turn). Checked here: challenge issued by this server, unused,
+ *   fresh, same steps · each action visible in its frame (pose / scale change from the neutral selfie,
+ *   measured by the face service, not by the phone) · opposite actions move in opposite directions ·
+ *   every frame the same face · passive liveness and face-swap / deepfake check on every frame.
+ *   Older builds that send a passive burst only are scored with a warning that routes to step-up.
+ *   Then, as before:
  *   selfie present · one face · passive liveness over selfie + burst frames · burst frames are all the
  *   same face · face-swap / deepfake injection (services/faceswap) · 1:1 selfie vs reference (chip DG2
  *   photo if read, else ID portrait) · printed portrait vs chip photo · 1:N over people: face cluster,
  *   other documents, repeat attempts, document presented before by someone else, document photo reused
  *
- * Re-verification (active, requested by the risk engine on MEDIUM or by an analyst):
- *   each requested gesture visible in its frame (pose change from the neutral selfie, measured by the
- *   service from landmarks) · liveness on every frame · new selfie matches the first selfie and the reference
+ * Re-verification (requested by the risk engine on MEDIUM or by an analyst): a new random sequence,
+ *   same action checks, and the new selfie must match the first selfie and the reference.
  */
 import * as fc from "./faceclient.ts";
 import * as fswap from "./faceswapclient.ts";
@@ -49,6 +54,124 @@ function livenessSig(label: string, scores: number[]): Sig | null {
   return sig(G, label, "WARN", val + " · inconclusive", rule, w.livenessInconclusive);
 }
 
+// ---------------------------------------------------------------------- randomized face challenge
+
+/** Uniform random pick without replacement (crypto RNG); always includes one of `oneOf` when given. */
+export function pickSteps(pool: string[], n: number, oneOf: string[] = []): string[] {
+  const rnd = (k: number) => crypto.getRandomValues(new Uint32Array(1))[0] % k;
+  const must = oneOf.filter((g) => pool.includes(g));
+  const out: string[] = must.length ? [must[rnd(must.length)]] : [];
+  const rest = pool.filter((g) => !out.includes(g));
+  while (out.length < Math.min(n, pool.length)) out.push(rest.splice(rnd(rest.length), 1)[0]);
+  for (let i = out.length - 1; i > 0; i--) { const j = rnd(i + 1); [out[i], out[j]] = [out[j], out[i]]; } // shuffle
+  return out;
+}
+
+/** POST /v1/face-challenges: a fresh action sequence the phone must perform, bound to an id it signs. */
+export async function issueFaceChallenge(sql: Sql, ip: string | null) {
+  const c = policy.faceChallenge;
+  const id = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const steps = pickSteps(c.gestures, c.steps, c.alwaysOneOf);
+  await sql`insert into attest.face_challenges (id, steps, expires_at, client_ip)
+            values (${id}, ${sql.json(steps)}, now() + make_interval(secs => ${c.ttlSeconds}), ${ip})`;
+  return { id, steps, expiresIn: c.ttlSeconds };
+}
+
+/** Is the sequence the phone performed the one this server issued? Consumes the challenge. */
+async function faceChallenge(sql: Sql, id: string | undefined, claimed: string[]): Promise<{ sig: Sig; steps: string[] }> {
+  const label = "Face challenge", rule = "random actions issued by this server at selfie time, single use";
+  if (!id) {
+    return { steps: claimed, sig: sig(G, label, "WARN", "no server challenge (offline capture): actions chosen on the phone", rule, w.noActiveChallenge) };
+  }
+  const key = String(id).slice(0, 64);
+  const [row] = await sql`update attest.face_challenges set used_at = now() where id = ${key} and used_at is null returning steps, expires_at`;
+  if (!row) {
+    const [seen] = await sql`select 1 from attest.face_challenges where id = ${key}`;
+    return { steps: claimed, sig: sig(G, label, "FAIL", seen ? "challenge already used (replayed capture)" : "unknown challenge id", rule, w.challengeInvalid) };
+  }
+  const steps: string[] = row.steps;
+  if (steps.join(",") !== claimed.join(",")) {
+    return { steps, sig: sig(G, label, "FAIL", `performed ${claimed.join(", ").toLowerCase() || "nothing"}; issued ${steps.join(", ").toLowerCase()}`, rule, w.challengeInvalid) };
+  }
+  const late = new Date(row.expires_at) < new Date();
+  return { steps, sig: sig(G, label, late ? "WARN" : "PASS", steps.join(" → ").toLowerCase() + (late ? " · submitted after expiry" : ""), rule, w.noActiveChallenge) };
+}
+
+interface GestureCheck { sig: Sig; lives: number[]; embs: (Float32Array | null)[] }
+
+/**
+ * Each requested action must be visible in its own frame, measured on the server from the face
+ * service's landmarks and box relative to the neutral selfie: turn = yaw, tilt = roll, closer / further
+ * = face area. Opposite actions must move in opposite directions.
+ */
+function checkGestures(neutral: fc.Probe, probes: Record<string, fc.Probe>, steps: string[],
+  gestures: { gesture?: string; frame?: string }[]): GestureCheck {
+  const frameFor = new Map(gestures.map((g) => [g.gesture, g.frame]));
+  const y0 = neutral.yaw ?? 0, r0 = neutral.roll ?? 0, a0 = neutral.area ?? 0;
+  let results: { step: string; ok: boolean; v: string; d?: number }[] = [];
+  const lives = neutral.live !== null ? [neutral.live] : [];
+  const embs: (Float32Array | null)[] = [neutral.embedding];
+  const sgn = (x: number, d: number) => (x >= 0 ? "+" : "") + x.toFixed(d);
+  for (const step of steps) {
+    const key = frameFor.get(step);
+    const p = key ? probes[key] : undefined;
+    if (!p || !p.faces) { results.push({ step, ok: false, v: "no frame / no face" }); continue; }
+    if (p.live !== null) lives.push(p.live);
+    embs.push(p.embedding);
+    if (step.startsWith("TURN")) {
+      const dy = (p.yaw ?? 0) - y0;
+      results.push({ step, ok: Math.abs(dy) >= cfg.gestureYaw, v: `yaw Δ ${sgn(dy, 2)}`, d: dy });
+    } else if (step.startsWith("TILT")) {
+      const dr = (p.roll ?? 0) - r0;
+      results.push({ step, ok: Math.abs(dr) >= cfg.gestureRoll, v: `roll Δ ${sgn(dr, 0)}°`, d: dr });
+    } else {
+      const ratio = a0 > 0 && p.area ? p.area / a0 : 0;
+      const ok = step === "MOVE_CLOSER" ? ratio >= cfg.gestureCloser : ratio > 0 && ratio <= cfg.gestureFurther;
+      results.push({ step, ok, v: `face area ×${ratio.toFixed(2)}` });
+    }
+  }
+  const dirs = new Map(results.filter((r) => r.ok && r.d !== undefined).map((r) => [r.step, r.d!]));
+  for (const [a, b] of [["TURN_LEFT", "TURN_RIGHT"], ["TILT_LEFT", "TILT_RIGHT"]]) {
+    if (dirs.has(a) && dirs.has(b) && Math.sign(dirs.get(a)!) === Math.sign(dirs.get(b)!)) {
+      results = results.map((r) => ([a, b].includes(r.step) ? { ...r, ok: false, v: r.v + " · same direction as its opposite" } : r));
+    }
+  }
+  const passed = results.length > 0 && results.every((r) => r.ok);
+  return {
+    lives, embs,
+    sig: sig(G, "Active liveness gestures", passed ? "PASS" : "FAIL",
+      results.map((r) => `${r.step.toLowerCase().replace("_", " ")} ${r.ok ? "✓" : "✗"} (${r.v})`).join(" · "),
+      "each random action visible in its frame (server-side pose and scale)", w.gestureFailed),
+  };
+}
+
+/** Every action frame must still be the neutral selfie's face: a swap that loses tracking mid-action dips here. */
+function sameFaceSig(neutral: fc.Probe, embs: (Float32Array | null)[]): Sig {
+  const sims = embs.slice(1).map((e) => (e ? dot(neutral.embedding!, e) : -1));
+  const ok = sims.every((x) => x >= cfg.burstThreshold);
+  return sig(G, "Same face across actions", ok ? "PASS" : "WARN",
+    sims.length ? `min similarity to the neutral selfie ${Math.min(...sims).toFixed(2)} over ${sims.length} frame(s)` : "no action frames",
+    `SFace ≥ ${cfg.burstThreshold} on every frame`, w.burstInconsistent);
+}
+
+/** Face-swap / deepfake injection on the given frames (services/faceswap — mock today, same contract). */
+async function swapSig(frames: Record<string, Uint8Array>): Promise<Sig | null> {
+  if (!Object.keys(frames).length) return null;
+  try {
+    const sw = await fswap.analyze("", frames);
+    const failAt = cfg.swapFailFrom, warnAt = cfg.swapWarnFrom;
+    const val = `swap_score ${sw.swapScore.toFixed(2)} over ${Object.keys(frames).length} frame(s) · ${sw.model} · ${sw.mode}` +
+      (sw.artifacts.length ? ` · ${sw.artifacts.slice(0, 3).join(", ")}` : "");
+    const rule = `swap_score < ${warnAt} pass · ≥ ${failAt} fail (${sw.mode})`;
+    if (sw.injectionLikely || sw.swapScore >= failAt) return sig(G, "Face-swap / deepfake", "FAIL", val, rule, w.faceSwapFail);
+    if (sw.swapScore >= warnAt) return sig(G, "Face-swap / deepfake", "WARN", val, rule, w.faceSwapWarn);
+    return sig(G, "Face-swap / deepfake", "PASS", val, rule, 0);
+  } catch (e) {
+    if (!(e instanceof fswap.Unavailable)) throw e;
+    return sig(G, "Face-swap / deepfake", "INFO", `unavailable: ${e.message}`.slice(0, 200), "services/faceswap");
+  }
+}
+
 function matchSig(label: string, sim: number, refName: string): Sig {
   const t = cfg.matchThreshold, rule = `SFace cosine ≥ ${t}`, val = `${sim.toFixed(2)} vs ${refName}`;
   if (sim >= t) return sig(G, label, "PASS", val, rule, w.faceMismatch);
@@ -56,16 +179,19 @@ function matchSig(label: string, sim: number, refName: string): Sig {
   return sig(G, label, "FAIL", val + " · different person", rule, w.faceMismatch);
 }
 
-export async function analyzeSession(sql: Sql, images: Record<string, Uint8Array>, documentNumber: string): Promise<FaceOutcome> {
+export interface FaceMeta { mode?: string; challenge?: string; gestures?: { gesture?: string; frame?: string }[] }
+
+export async function analyzeSession(sql: Sql, images: Record<string, Uint8Array>, documentNumber: string, meta: FaceMeta = {}): Promise<FaceOutcome> {
   const out = outcome();
-  const wanted = Object.fromEntries(Object.entries(images).filter(([k]) => ["selfie", "portrait", "chipPhoto"].includes(k) || k.startsWith("burst")));
+  const isFrame = (k: string) => k.startsWith("burst") || k.startsWith("active");
+  const wanted = Object.fromEntries(Object.entries(images).filter(([k]) => ["selfie", "portrait", "chipPhoto"].includes(k) || isFrame(k)));
   if (!("selfie" in wanted)) {
     out.signals.push(sig(G, "Selfie captured", "WARN", "no selfie in this session", "passive selfie required; active liveness requested instead", w.noSelfie));
     if (!Object.keys(wanted).length) return out;
   }
   let probes: Record<string, fc.Probe>;
   try {
-    probes = await fc.analyze(wanted, Object.keys(wanted).filter((k) => k === "selfie" || k.startsWith("burst")));
+    probes = await fc.analyze(wanted, Object.keys(wanted).filter((k) => k === "selfie" || isFrame(k)));
   } catch (e) {
     if (!(e instanceof fc.Unavailable)) throw e;
     out.signals.push(sig(G, "Face service", "INFO", `unavailable: ${e.message}`.slice(0, 200), "services/face"));
@@ -73,6 +199,7 @@ export async function analyzeSession(sql: Sql, images: Record<string, Uint8Array
   }
   const selfie = probes.selfie, portrait = probes.portrait, chip = probes.chipPhoto;
   const bursts = Object.keys(probes).sort().filter((k) => k.startsWith("burst")).map((k) => probes[k]);
+  const actions = Object.keys(probes).sort().filter((k) => k.startsWith("active")).map((k) => probes[k]);
 
   // exactly one face in the selfie
   if (selfie) {
@@ -81,37 +208,30 @@ export async function analyzeSession(sql: Sql, images: Record<string, Uint8Array
     else out.signals.push(sig(G, "Face in selfie", "PASS", `detector ${(selfie.score ?? 0).toFixed(2)}`, "exactly one face", w.noFace));
   }
 
-  // passive liveness (server)
-  const lives = [...(selfie ? [selfie] : []), ...bursts].filter((p) => p.faces && p.live !== null).map((p) => p.live!);
+  // randomized actions: issued by this server, performed in order, each re-measured here
+  if (meta.mode === "ACTIVE" && selfie) {
+    const claimed = (meta.gestures ?? []).map((g) => String(g.gesture ?? ""));
+    const ch = await faceChallenge(sql, meta.challenge, claimed);
+    out.signals.push(ch.sig);
+    if (selfie.faces && selfie.embedding) {
+      const g = checkGestures(selfie, probes, ch.steps, meta.gestures ?? []);
+      out.signals.push(g.sig, sameFaceSig(selfie, g.embs));
+    } else {
+      out.signals.push(sig(G, "Active liveness gestures", "FAIL", "no face in the neutral selfie", "face visible", w.gestureFailed));
+    }
+  } else if (selfie) {
+    out.signals.push(sig(G, "Face challenge", "WARN", "passive capture only (no random actions performed)",
+      "random face actions on every session", w.noActiveChallenge));
+  }
+
+  // passive liveness (server), on the selfie and every capture frame
+  const lives = [...(selfie ? [selfie] : []), ...bursts, ...actions].filter((p) => p.faces && p.live !== null).map((p) => p.live!);
   const ls = livenessSig("Passive liveness (server)", lives);
   if (ls) { out.signals.push(ls); out.liveness = mean(lives); }
 
-  // face-swap / deepfake injection (services/faceswap — mock today; same contract for a real model)
-  const swapFrames = Object.fromEntries(
-    Object.entries(wanted).filter(([k]) => k === "selfie" || k.startsWith("burst")),
-  );
-  if (Object.keys(swapFrames).length) {
-    try {
-      const sw = await fswap.analyze("", swapFrames);
-      const failAt = cfg.swapFailFrom, warnAt = cfg.swapWarnFrom;
-      const val = `swap_score ${sw.swapScore.toFixed(2)} · ${sw.model} · ${sw.mode}` +
-        (sw.artifacts.length ? ` · ${sw.artifacts.slice(0, 3).join(", ")}` : "");
-      const rule = `swap_score < ${warnAt} pass · ≥ ${failAt} fail (${sw.mode})`;
-      let outcome: "PASS" | "WARN" | "FAIL" = "PASS";
-      let pts = 0;
-      if (sw.injectionLikely || sw.swapScore >= failAt) {
-        outcome = "FAIL";
-        pts = w.faceSwapFail;
-      } else if (sw.swapScore >= warnAt) {
-        outcome = "WARN";
-        pts = w.faceSwapWarn;
-      }
-      out.signals.push(sig(G, "Face-swap / deepfake", outcome, val, rule, pts));
-    } catch (e) {
-      if (!(e instanceof fswap.Unavailable)) throw e;
-      out.signals.push(sig(G, "Face-swap / deepfake", "INFO", `unavailable: ${e.message}`.slice(0, 200), "services/faceswap"));
-    }
-  }
+  // face-swap / deepfake injection on the selfie and every frame (services/faceswap — mock today)
+  const swap = await swapSig(Object.fromEntries(Object.entries(wanted).filter(([k]) => k === "selfie" || isFrame(k))));
+  if (swap) out.signals.push(swap);
 
   // burst consistency: every passive frame shows the selfie's face
   if (selfie?.embedding && bursts.length) {
@@ -277,12 +397,7 @@ export async function issue(sql: Sql, caseId: number, requestedBy: string): Prom
   const [pending] = await sql<Rv[]>`select * from attest.reverifications where case_id = ${caseId} and status = 'PENDING' and expires_at > now() limit 1`;
   if (pending) return pending;
   const a = policy.activeLiveness;
-  const pool = [...a.gestures];
-  const steps: string[] = [];
-  while (steps.length < Math.min(a.steps, a.gestures.length)) {
-    const r = crypto.getRandomValues(new Uint32Array(1))[0] % pool.length;
-    steps.push(pool.splice(r, 1)[0]);
-  }
+  const steps = pickSteps(a.gestures, a.steps, policy.faceChallenge.alwaysOneOf);
   const [row] = await sql<Rv[]>`
     insert into attest.reverifications (case_id, number, steps, requested_by, expires_at)
     values (${caseId}, (select coalesce(max(number), 0) + 1 from attest.reverifications where case_id = ${caseId}),
@@ -310,40 +425,13 @@ export async function analyzeActive(sql: Sql, c: { id: number; document_number: 
     return out;
   }
 
-  // each requested gesture: its frame must show the pose change, measured by the service from landmarks
-  const frameFor = new Map(gestures.map((g) => [g.gesture, g.frame]));
-  const y0 = neutral.yaw ?? 0, r0 = neutral.roll ?? 0;
-  let results: { step: string; ok: boolean; v: string; d?: number }[] = [];
-  const lives = neutral.live !== null ? [neutral.live] : [];
-  const embs: (Float32Array | null)[] = [neutral.embedding];
-  for (const step of rv.steps) {
-    const key = frameFor.get(step);
-    const p = key ? probes[key] : undefined;
-    if (!p || !p.faces) { results.push({ step, ok: false, v: "no frame / no face" }); continue; }
-    if (p.live !== null) lives.push(p.live);
-    embs.push(p.embedding);
-    const dy = (p.yaw ?? 0) - y0, dr = (p.roll ?? 0) - r0;
-    const sgn = (x: number, d: number) => (x >= 0 ? "+" : "") + x.toFixed(d);
-    if (step.startsWith("TURN")) results.push({ step, ok: Math.abs(dy) >= cfg.gestureYaw, v: `yaw Δ ${sgn(dy, 2)}`, d: dy });
-    else results.push({ step, ok: Math.abs(dr) >= cfg.gestureRoll, v: `roll Δ ${sgn(dr, 0)}°`, d: dr });
-  }
-  // opposite gestures must move in opposite directions (a replayed clip rarely matches a random order)
-  const dirs = new Map(results.filter((r) => r.ok && r.d !== undefined).map((r) => [r.step, r.d!]));
-  for (const [a, b] of [["TURN_LEFT", "TURN_RIGHT"], ["TILT_LEFT", "TILT_RIGHT"]]) {
-    if (dirs.has(a) && dirs.has(b) && Math.sign(dirs.get(a)!) === Math.sign(dirs.get(b)!)) {
-      results = results.map((r) => ([a, b].includes(r.step) ? { ...r, ok: false, v: r.v + " · same direction as its opposite" } : r));
-    }
-  }
-  const passed = results.every((r) => r.ok);
-  out.signals.push(sig(G, "Active liveness gestures", passed ? "PASS" : "FAIL",
-    results.map((r) => `${r.step.toLowerCase().replace("_", " ")} ${r.ok ? "✓" : "✗"} (${r.v})`).join(" · "),
-    "each random gesture visible in its frame (server-side pose)", w.gestureFailed));
-
-  const ls = livenessSig("Liveness on gesture frames", lives);
-  if (ls) { out.signals.push(ls); out.liveness = mean(lives); }
-  const consistent = embs.every((e) => e && dot(neutral.embedding!, e) >= cfg.burstThreshold);
-  out.signals.push(sig(G, "Same face across gestures", consistent ? "PASS" : "WARN",
-    consistent ? "all frames match the neutral frame" : "frames show different faces", `≥ ${cfg.burstThreshold}`, w.burstInconsistent));
+  const g = checkGestures(neutral, probes, rv.steps, gestures);
+  out.signals.push(g.sig);
+  const ls = livenessSig("Liveness on gesture frames", g.lives);
+  if (ls) { out.signals.push(ls); out.liveness = mean(g.lives); }
+  out.signals.push(sameFaceSig(neutral, g.embs));
+  const swap = await swapSig(wanted);
+  if (swap) out.signals.push(swap);
 
   // new selfie vs the first selfie and vs the document reference, against the stored gallery templates
   const names: Record<string, string> = { selfie: "first selfie", chipPhoto: "chip photo (DG2)", portrait: "ID portrait" };

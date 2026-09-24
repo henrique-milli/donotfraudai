@@ -5,6 +5,7 @@
  * Device-facing (no auth; the payload itself is sealed and signed):
  *   GET  /v1/keys                    active envelope public key (the app pins it at build time)
  *   POST /v1/challenges              fresh single-use attestation challenge
+ *   POST /v1/face-challenges         random face actions for the selfie step {id, steps, expiresIn}
  *   POST /v1/sessions                sealed session → {session, route}; never the reasons
  *   POST /v1/sessions/:id/next       {token} → NONE | ACTIVE_LIVENESS {steps}
  * Analyst-facing (header `x-analyst-token: $ANALYST_TOKEN`, `x-analyst: <name>` for the audit trail):
@@ -20,9 +21,10 @@ import * as views from "../_shared/console.ts";
 import { sql } from "../_shared/db.ts";
 import { activeKid, ALG, publicSpki } from "../_shared/envelope.ts";
 import * as intake from "../_shared/intake.ts";
+import { issueFaceChallenge } from "../_shared/facecheck.ts";
 import { policy } from "../_shared/policy.ts";
 import { verifyChain } from "../_shared/audit.ts";
-import { utf8 } from "../_shared/util.ts";
+import { asAb, utf8 } from "../_shared/util.ts";
 
 const CORS = {
   "access-control-allow-origin": Deno.env.get("ANALYST_ORIGIN") ?? "*",
@@ -62,6 +64,9 @@ async function handle(req: Request): Promise<Response> {
   if (p === "/v1/challenges" && req.method === "POST") {
     const ttl = policy.challenge.ttlSeconds;
     return json({ challenge: await intake.issueChallenge(sql, ttl, clientIp(req)), expiresIn: ttl }, 201);
+  }
+  if (p === "/v1/face-challenges" && req.method === "POST") {
+    return json(await issueFaceChallenge(sql, clientIp(req)), 201);
   }
   if (p === "/v1/sessions" && req.method === "POST") {
     const env = await req.json().catch(() => null);
@@ -109,7 +114,7 @@ async function handle(req: Request): Promise<Response> {
       const i = await views.image(sql, Number(m[1]), m[2]);
       if (!i) return json({ error: "not found" }, 404);
       const bytes: Uint8Array = i.storage_key ? await blob.get(i.storage_key) : i.data;
-      return new Response(bytes, { headers: { ...CORS, "content-type": i.mime, "cache-control": "private, max-age=300", "x-content-type-options": "nosniff" } });
+      return new Response(asAb(bytes), { headers: { ...CORS, "content-type": i.mime, "cache-control": "private, max-age=300", "x-content-type-options": "nosniff" } });
     }
   }
   return json({ error: "not found" }, 404);

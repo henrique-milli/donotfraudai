@@ -102,6 +102,7 @@ object Payload {
 
     private fun faceJson(f: FaceCapture) = JSONObject().apply {
         put("mode", f.mode)
+        put("challenge", f.challenge ?: JSONObject.NULL)
         put("gestures", JSONArray().apply {
             f.gestures.forEachIndexed { i, g -> put(JSONObject().apply { put("gesture", g); put("frame", "active${i + 1}") }) }
         })

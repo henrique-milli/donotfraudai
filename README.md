@@ -21,7 +21,9 @@ supabase/       Postgres (+pgvector), Storage, the attest Edge Function
 
 ```
 phone ── POST /v1/challenges ─────────────► single-use challenge
-phone: hardware-attested key bound to it · scan front/back · chip read when the card has one · selfie
+phone: hardware-attested key bound to it · scan front/back · chip read when the card has one
+phone ── POST /v1/face-challenges ────────► random actions, issued at selfie time (always one head turn)
+phone: neutral selfie + one frame per action
 phone ── POST /v1/sessions {sealed} ─────► verify signature + attestation chain · face 1:1/1:N/liveness
                                             · faceswap/deepfake · score · route: CONTINUE / STEP_UP / MANUAL_REVIEW
 phone ── POST /v1/sessions/:id/next ─────► NONE | ACTIVE_LIVENESS {random gestures}
@@ -46,7 +48,7 @@ Neither private schema is exposed through the Data API; only the edge function r
 | **Chip downgrade**: a chipped card, but the attacker skips the chip and goes through the photo-only path | The strong check is optional, so fraud takes the weak one; both end in the same identity | The ICAO chip symbol is detected on the card itself. When it's there and the phone has NFC, the chip read is **required**: DG1 must match the printed MRZ and the issuer's signature must verify. A refused tap is scored and routed, not waved through |
 | **Screen replay / print / colour copy** of a real card | Account opened with someone else's document | On-device presentation-attack checks (physical vs screen vs paper, moiré, colourfulness), reported as signals, never silently dropped |
 | **Photo substitution** on a genuine card | Impostor's face on a real document | Printed portrait vs the chip's signed DG2 photo; selfie matched 1:1 against the chip photo first |
-| **Deepfake / face-swap / replayed selfie** | Face check passed without a live person | Passive liveness (MiniFASNet) + burst consistency; **faceswap service** (`services/faceswap`, mock contract) scores swap/deepfake injection; medium risk triggers **active liveness** (random gestures) |
+| **Deepfake / face-swap / replayed selfie** | Face check passed without a live person | **Randomized actions on every selfie**: 3 of turn left/right, tilt left/right, move closer/further, always with one head turn, drawn by the server when the camera opens. The phone signs the challenge id; the server consumes it once and re-measures each action from its own face analysis (yaw, roll, face size vs the neutral selfie). A pre-recorded clip can't know the order. A live swap has to hold up through the turn, which is where these models, trained on frontal faces, lose tracking; every frame must stay the same face. Passive liveness and the **faceswap service** (`services/faceswap`, mock contract today) run on every frame. Medium risk asks for a second, new sequence |
 | **One face, many documents** (mules, synthetic identities) | One fraudster opens many accounts | 1:N over live selfies clusters faces across sessions. The console shows how many documents each face has tried, and flags a document already presented by a different face |
 | **Emulator, rooted phone, hooking, injected camera** | Everything above is bypassed at the source | Hardware key attestation (StrongBox/TEE, verified boot, lock state, app identity), re-parsed on the server from the certificate chain. Root, hook, emulator and debugger checks, plus a boot-state consistency check (OS properties vs attested boot) |
 | **Tampered or replayed payload** | Forged signals reach the backend | Payload signed by the attested key over a single-use server challenge, sealed with ECDH-ES P-256 + AES-256-GCM. The server rescores from raw signals; the phone's own score is advisory |

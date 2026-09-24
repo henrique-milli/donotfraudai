@@ -64,13 +64,13 @@ export async function stats(sql: Sql) {
 type Row = Record<string, any>;
 
 function groupRows(signals: Row[]) {
-  const rows = [];
+  const rows: Row[] = [];
   for (const [key, title, sub] of GROUPS) {
     const g = signals.filter((s) => s.grp === key);
     if (!g.length) continue;
     const scored = g.filter((s) => ["PASS", "FAIL", "WARN"].includes(s.outcome));
     const worst = scored.length ? g.reduce((a, s) => (RANK[s.outcome] > RANK[a.outcome] ? s : a)).outcome : "INFO";
-    const f = g.filter(fired).sort((a, b) => b.risk_points - a.risk_points);
+    const f = g.filter((s) => fired(s as { outcome: string })).sort((a, b) => b.risk_points - a.risk_points);
     const raw = g.reduce((a, s) => a + s.risk_points, 0);
     const cap = policy.risk.groupCaps[key];
     rows.push({
@@ -133,7 +133,7 @@ export async function caseDetail(sql: Sql, number: number) {
         : "no earlier live selfie matches this face",
     },
     selfie: img.selfie ?? null, reference: c.face_reference ? img[c.face_reference] ?? null : null,
-    frames: Object.keys(img).sort().filter((k) => /^burst\d$/.test(k)).map((k) => img[k]),
+    frames: Object.keys(img).sort().filter((k) => /^(burst|active)\d$/.test(k)).map((k) => img[k]),
     similarity: c.face_similarity, liveness: c.liveness_score,
     signals: fs,
     reverifications: rvs.map((r) => ({

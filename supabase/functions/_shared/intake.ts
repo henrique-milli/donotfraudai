@@ -136,7 +136,7 @@ export async function ingest(sql: Sql, env: Envelope, clientIp: string | null, d
 
   const devSigs = deviceSigs(payload, "DEVICE");
   const srvSigs = serverSignals(v, history);
-  const f = await face.analyzeSession(sql, Object.fromEntries(images.map((i) => [i.kind, i.data])), h.document_number);
+  const f = await face.analyzeSession(sql, Object.fromEntries(images.map((i) => [i.kind, i.data])), h.document_number, payload.face ?? {});
   const all = [...devSigs, ...srvSigs, ...f.signals];
   const s = score(all);
 

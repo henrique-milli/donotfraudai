@@ -83,6 +83,8 @@ class FaceCapture(
     val frames: List<Bitmap>,              // burst frames (passive) or gesture frames (active), in step order
     val gestures: List<String> = emptyList(),
     val checks: List<Check>,
+    /** id of the server-issued face challenge the gestures answer; null when drawn offline */
+    val challenge: String? = null,
 )
 
 /** In-memory session for one onboarding run. */

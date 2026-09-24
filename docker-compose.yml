@@ -38,6 +38,7 @@ services:
       - ./supabase/local/00_bootstrap.sql:/docker-entrypoint-initdb.d/00_bootstrap.sql:ro
       - ./supabase/migrations/20260924121000_attest_private_schemas.sql:/docker-entrypoint-initdb.d/10_schemas.sql:ro
       - ./supabase/migrations/20260924130000_attest_tables.sql:/docker-entrypoint-initdb.d/20_tables.sql:ro
+      - ./supabase/migrations/20260924140000_face_challenges.sql:/docker-entrypoint-initdb.d/30_face_challenges.sql:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 3s
@@ -45,7 +46,7 @@ services:
 
   attest-api:
     profiles: [standalone]
-    image: denoland/deno:2.1.4
+    image: denoland/deno:2.9.7
     working_dir: /functions/attest
     command: deno run --frozen --allow-net --allow-env --allow-read index.ts
     env_file: ./supabase/functions/.env

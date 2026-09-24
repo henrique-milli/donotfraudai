@@ -235,7 +235,7 @@ function Case({ d, fail, onChange }: { d: CaseDetail; fail: (e: unknown) => void
                 </div>
               ) : null}
               {f.frames.length ? (
-                <div className="strip">{f.frames.map((im) => <Open key={im.kind} img={im}><Pic img={im} /></Open>)}<small>passive capture frames</small></div>
+                <div className="strip">{f.frames.map((im) => <Open key={im.kind} img={im}><Pic img={im} /></Open>)}<small>capture frames: the random actions, in order</small></div>
               ) : null}
               {f.reverifications.map((r) => (
                 <div key={r.number} className={`rv s-${r.status.toLowerCase()}`}>

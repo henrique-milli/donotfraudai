@@ -11,7 +11,7 @@ import { b64, unb64 } from "./util.ts";
 export class Unavailable extends Error {}
 
 export interface Probe {
-  kind: string; faces: number; score: number | null; yaw: number | null; roll: number | null;
+  kind: string; faces: number; score: number | null; yaw: number | null; roll: number | null; area: number | null;
   embedding: Float32Array | null; live: number | null;
 }
 
@@ -52,6 +52,7 @@ export async function analyze(images: Record<string, Uint8Array>, liveness: stri
   for (const [k, r] of Object.entries(res)) {
     const f = r.face ?? {};
     out[k] = { kind: k, faces: r.faces, score: f.score ?? null, yaw: f.yaw ?? null, roll: f.roll ?? null,
+      area: Array.isArray(f.box) ? f.box[2] * f.box[3] : null,
       embedding: emb(r.embedding), live: r.liveness ?? null };
   }
   return out;
