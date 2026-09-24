@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import ch.attest.onboarding.BuildConfig
 import ch.attest.onboarding.R
 import ch.attest.onboarding.core.Envelope
+import ch.attest.onboarding.core.Ladder
 import ch.attest.onboarding.core.Check
 import ch.attest.onboarding.core.Group
 import ch.attest.onboarding.core.LastSession
@@ -46,7 +47,7 @@ class ResultActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val preview = intent.getBooleanExtra(EXTRA_APPLICANT, false)
-        if (preview) { applicant(true); return }
+        if (preview) { applicant(true, null); return }
         if (intent.getBooleanExtra(EXTRA_REVERIFIED, false)) { reverified(); return }
         // attestation → sign → seal → deliver; then ask the backend whether it needs an active check
         presenterLoading()
@@ -60,9 +61,9 @@ class ResultActivity : AppCompatActivity() {
                 if (isFinishing) return@runOnUiThread
                 when {
                     Mode.stage -> presenter(sealed, pending)
-                    // applicant: the step-up is simply the next screen, with no reason given
+                    // applicant: analyst-requested step-up is simply the next screen, with no reason given
                     pending != null -> { startActivity(SelfieActivity.active(this, pending)); finish() }
-                    else -> applicant(false)
+                    else -> applicant(false, sealed?.route)
                 }
             }
         }.start()
@@ -97,11 +98,33 @@ class ResultActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------------ applicant
 
-    private fun applicant(preview: Boolean) {
+    private fun applicant(preview: Boolean, route: String?) {
         val b = ActivityDoneBinding.inflate(layoutInflater)
         setContentView(b.root)
         b.root.padForSystemBars()
+        // Polite endings only — never scores or reasons (oracle-safe).
+        when (route) {
+            "CONTINUE" -> {
+                b.title.setText(R.string.done_title_ok)
+                b.body.setText(R.string.done_body_ok)
+            }
+            "BRANCH_VISIT" -> {
+                b.title.setText(R.string.done_title_branch)
+                b.body.setText(R.string.done_body_branch)
+            }
+            "MANUAL_REVIEW" -> {
+                b.title.setText(R.string.done_title_review)
+                b.body.setText(R.string.done_body_review)
+            }
+            else -> {
+                b.title.setText(R.string.done_title)
+                b.body.setText(R.string.done_body)
+            }
+        }
         b.presenterNote.visibility = if (preview) View.VISIBLE else View.GONE
+        if (preview) {
+            b.presenterNote.text = "Presenter: applicant ending for route ${route ?: "(preview)"}. No scores or reasons."
+        }
         b.mark.scaleX = 0.5f; b.mark.scaleY = 0.5f; b.mark.alpha = 0f
         b.mark.animate().scaleX(1f).scaleY(1f).alpha(1f).setStartDelay(120).setDuration(380).start()
         b.btnDone.setOnClickListener { if (preview) finish() else home() }
@@ -137,8 +160,9 @@ class ResultActivity : AppCompatActivity() {
         }
 
         val all = Session.allChecks()
-        hero(all)
-        drivers(all)
+        val ladder = Ladder.score(all)
+        hero(all, ladder)
+        ladderSteps(ladder)
         groups(all)
         b.reveal.setOnClickListener { revealed = !revealed; holder() }
         holder()
@@ -153,42 +177,42 @@ class ResultActivity : AppCompatActivity() {
         Outcome.INFO, Outcome.SKIPPED -> R.color.at_info to R.color.at_surface
     }
 
-    private fun hero(all: List<Check>) {
-        val v = Session.verdict(all)
-        val score = Session.riskScore(all)
+    private fun hero(all: List<Check>, ladder: Ladder.Result) {
+        val v = ladder.verdict
+        val score = ladder.score
         val a = Session.assurance(v)
         b.docType.text = Session.selected.title
         b.gauge.set(score)
         b.verdict.text = v.title
         b.verdict.setTextColor(
-            c(when (v) { Session.Verdict.ACCEPTED -> R.color.at_pass; Session.Verdict.REVIEW -> R.color.at_warn; Session.Verdict.REJECTED -> R.color.at_fail }),
+            c(when (v) { Session.Verdict.ACCEPTED -> R.color.at_pass; Session.Verdict.REVIEW -> R.color.at_warn; Session.Verdict.BRANCH -> R.color.at_fail }),
         )
         b.assurance.text = "Assurance · ${a.title}"
         b.assuranceDetail.text = a.detail
         val scored = all.filter { it.outcome != Outcome.SKIPPED }
-        b.statSignals.value.text = "${scored.size}"; b.statSignals.label.text = "signals"
-        b.statPassed.value.text = "${all.count { it.outcome == Outcome.PASS }}"; b.statPassed.label.text = "passed"
-        val fired = all.count { it.fired }
-        b.statFired.value.text = "$fired"; b.statFired.label.text = "fired"
+        b.statSignals.value.text = "${ladder.steps.size}"; b.statSignals.label.text = "steps"
+        b.statPassed.value.text = "${ladder.steps.count { it.outcome == Outcome.PASS }}"; b.statPassed.label.text = "passed"
+        val fired = ladder.steps.count { it.outcome == Outcome.FAIL || it.outcome == Outcome.WARN }
+        b.statFired.value.text = "$fired"; b.statFired.label.text = "weak"
         b.statFired.value.setTextColor(c(if (fired == 0) R.color.at_ink else R.color.at_fail))
     }
 
-    private fun drivers(all: List<Check>) {
-        val top = Session.drivers(all).take(4)
-        if (top.isEmpty()) {
+    private fun ladderSteps(ladder: Ladder.Result) {
+        b.drivers.removeAllViews()
+        if (ladder.steps.isEmpty()) {
             b.drivers.addView(TextView(this).apply {
                 setTextAppearance(R.style.at_body); text = getString(R.string.result_no_drivers)
             })
             return
         }
-        top.forEach { ch ->
+        ladder.steps.forEach { st ->
             val r = RowDriverBinding.inflate(layoutInflater, b.drivers, false)
-            val (fg, bg) = tone(ch.outcome)
-            r.points.text = "+${ch.points}"
+            val (fg, bg) = tone(st.outcome)
+            r.points.text = "${(st.confidence * 100).toInt()}%"
             r.points.setTextColor(c(fg))
             r.points.backgroundTintList = ColorStateList.valueOf(c(bg))
-            r.why.text = ch.why ?: ch.label
-            r.source.text = listOfNotNull(ch.group.title, ch.side?.label, ch.value).joinToString(" · ")
+            r.why.text = st.title
+            r.source.text = st.summary
             b.drivers.addView(r.root)
         }
     }
@@ -214,7 +238,7 @@ class ResultActivity : AppCompatActivity() {
                 gb.rows.visibility = if (open) View.VISIBLE else View.GONE
                 gb.chevron.animate().rotation(if (open) 90f else 0f).setDuration(150).start()
             }
-            setOpen(worst == Outcome.FAIL || worst == Outcome.WARN)
+            setOpen(false) // raw signals collapsed — confidence path is the primary view
             gb.header.setOnClickListener { setOpen(gb.rows.visibility != View.VISIBLE) }
             b.groups.addView(gb.root)
         }

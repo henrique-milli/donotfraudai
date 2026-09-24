@@ -1,12 +1,15 @@
 /**
  * Server risk engine. The phone's own score is advisory; the backend re-scores every session from
  * the raw signals plus what only the server can know (verification results, history).
- *   score = sum over groups of min(sum of fired risk points in group, group cap), capped at 100
+ *
+ * Scoring is the confidence-path ladder (`ladder.ts`): per-step confidence → weighted final risk.
  *   level = LOW < 25 <= MEDIUM < 60 <= HIGH;  any FAIL in a hard-stop group -> HIGH
- *   route = LOW -> CONTINUE, MEDIUM -> STEP_UP, HIGH -> MANUAL_REVIEW
+ *   route = LOW -> CONTINUE, MEDIUM -> MANUAL_REVIEW, HIGH -> BRANCH_VISIT
+ *   (no auto-deny; analysts may still REJECT after review)
  */
 import { policy } from "./policy.ts";
 import type { Verification } from "./attestation.ts";
+import { scoreLadder, type LadderScore } from "./ladder.ts";
 
 export interface Sig { grp: string; label: string; outcome: string; value: string; rule: string; risk_points: number; side: string; source: string }
 
@@ -47,13 +50,22 @@ export function serverSignals(v: Verification, history: { documentRejected: bool
   return out;
 }
 
-export function score(signals: { grp: string; outcome: string; risk_points: number }[]): { score: number; level: string; route: string } {
-  const r = policy.risk;
-  const by: Record<string, number> = {};
-  for (const s of signals) if (fired(s)) by[s.grp] = (by[s.grp] ?? 0) + s.risk_points;
-  const total = Math.min(100, Object.entries(by).reduce((a, [g, p]) => a + Math.min(p, r.groupCaps[g] ?? 100), 0));
-  const hard = signals.some((s) => s.outcome === "FAIL" && r.hardStopGroups.includes(s.grp));
-  const padPass = signals.some((s) => s.grp === "PAD" && s.outcome === "PASS");
-  const level = hard || total >= r.highFrom ? "HIGH" : (total >= r.lowBelow || !padPass) ? "MEDIUM" : "LOW";
-  return { score: total, level, route: policy.routes[level] };
+/** Full ladder score (steps + final). Prefer this when chip/doc context is available. */
+export function scoreWithLadder(
+  signals: Sig[],
+  opts: { chipVerified?: boolean; chipExpected?: string; documentNumber?: string } = {},
+): LadderScore {
+  return scoreLadder(signals, opts);
+}
+
+/** Compatible wrapper: same shape as before for call sites that only need score/level/route. */
+export function score(signals: { grp: string; outcome: string; risk_points: number; label?: string; value?: string; rule?: string; side?: string; source?: string }[]): {
+  score: number; level: string; route: string; ladder?: LadderScore;
+} {
+  const full: Sig[] = signals.map((s) => ({
+    grp: s.grp, label: s.label ?? "", outcome: s.outcome, value: s.value ?? "", rule: s.rule ?? "",
+    risk_points: s.risk_points, side: s.side ?? "", source: s.source ?? "SERVER",
+  }));
+  const ladder = scoreLadder(full);
+  return { score: ladder.score, level: ladder.level, route: ladder.route, ladder };
 }

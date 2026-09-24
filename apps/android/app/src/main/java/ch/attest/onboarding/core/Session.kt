@@ -152,13 +152,18 @@ object Session {
 
     // ------------------------------------------------------------------ decision
 
-    enum class Verdict(val title: String) { ACCEPTED("Verified"), REVIEW("Needs review"), REJECTED("Rejected") }
+    enum class Verdict(val title: String) {
+        ACCEPTED("Verified"),
+        REVIEW("Needs review"),
+        /** Low confidence: invite to a branch — not an unappealable auto-deny. */
+        BRANCH("Visit a branch"),
+    }
 
     enum class Assurance(val title: String, val detail: String) {
         HIGH("High", "chip signature verified"),
         SUBSTANTIAL("Substantial", "visual checks only — no chip evidence"),
-        PENDING("Pending", "decided after manual review"),
-        NONE("None", "evidence rejected"),
+        PENDING("Pending", "decided after review or a branch visit"),
+        NONE("None", "not used for auto outcomes"),
     }
 
     /**
@@ -184,21 +189,22 @@ object Session {
 
     fun verdict(all: List<Check> = allChecks()): Verdict {
         // hard stops: attack evidence, wrong document, broken chip crypto, compromised channel
+        // → branch invite locally (server maps HIGH risk → BRANCH_VISIT; no auto-deny)
         if (all.any { it.outcome == Outcome.FAIL && it.group in setOf(Group.PAD, Group.CLASSIFICATION, Group.CHIP, Group.DEVICE) }) {
-            return Verdict.REJECTED
+            return Verdict.BRANCH
         }
         // nothing to be confident about: no presentation-attack evidence was captured at all
         if (all.none { it.group == Group.PAD && it.outcome == Outcome.PASS }) return Verdict.REVIEW
         val score = riskScore(all)
         return when {
-            score >= 60 -> Verdict.REJECTED
+            score >= 60 -> Verdict.BRANCH
             score >= 25 -> Verdict.REVIEW
             else -> Verdict.ACCEPTED
         }
     }
 
     fun assurance(v: Verdict = verdict()): Assurance = when {
-        v == Verdict.REJECTED -> Assurance.NONE
+        v == Verdict.BRANCH -> Assurance.PENDING
         v == Verdict.REVIEW -> Assurance.PENDING
         chipVerified() -> Assurance.HIGH
         else -> Assurance.SUBSTANTIAL

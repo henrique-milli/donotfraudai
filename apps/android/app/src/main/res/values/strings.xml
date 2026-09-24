@@ -93,13 +93,19 @@
 
     <string name="done_title">You\'re all set</string>
     <string name="done_body">Thanks. We\'re confirming your document and will let you know shortly.</string>
+    <string name="done_title_ok">You\'re verified</string>
+    <string name="done_body_ok">Your identity check is complete. You can close this screen.</string>
+    <string name="done_title_review">We\'re reviewing</string>
+    <string name="done_body_review">Thanks. A specialist is reviewing your submission and will follow up shortly.</string>
+    <string name="done_title_branch">Please visit a branch</string>
+    <string name="done_body_branch">We couldn\'t finish this check online. Please visit your nearest branch with your ID — you can appeal and complete verification there.</string>
     <string name="done_again">Done</string>
 
     <string name="result_again">Verify another document</string>
     <string name="result_as_applicant">See what the applicant sees</string>
-    <string name="result_drivers">Why this score</string>
-    <string name="result_no_drivers">No risk signal fired.</string>
-    <string name="result_signals">Signals</string>
+    <string name="result_drivers">Confidence path</string>
+    <string name="result_no_drivers">No step scores yet.</string>
+    <string name="result_signals">Raw signals</string>
     <string name="result_holder">Holder</string>
     <string name="result_images">Captured</string>
     <string name="result_footnote">Risk points are hand-set weights for this demo, not a trained model. The same signals are written to the session payload in production, where the applicant sees none of them.</string>

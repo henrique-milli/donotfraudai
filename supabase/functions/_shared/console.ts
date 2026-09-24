@@ -6,6 +6,7 @@
 import type { Sql } from "./db.ts";
 import { clusterLabel } from "./facecheck.ts";
 import { OPEN } from "./intake.ts";
+import { scoreLadder } from "./ladder.ts";
 import { policy } from "./policy.ts";
 import { fired } from "./risk.ts";
 
@@ -144,8 +145,21 @@ export async function caseDetail(sql: Sql, number: number) {
   };
   const order = ["selfie", "portrait", "chipPhoto", "front", "back"].filter((k) => img[k]).map((k) => img[k]);
   const { payload: _p, resume_token_hash: _t, id: _id, ...pub } = c;
+  const ladder = scoreLadder(signals as any, {
+    chipVerified: !!c.chip_verified,
+    chipExpected: c.chip_expected ?? "",
+    documentNumber: c.document_number ?? "",
+  });
   return {
     case: { ...pub, face_cluster: label },
+    ladder: {
+      confidence: ladder.confidence,
+      score: ladder.score,
+      level: ladder.level,
+      route: ladder.route,
+      steps: ladder.steps,
+      agent: ladder.agent ?? null,
+    },
     groups: groupRows(signals), evidence: evidence(c), face: facePanel, images: order, allImages: Object.values(img),
     portrait: img.chipPhoto ?? img.portrait ?? null, decisions, audit: auditRows,
     drivers: signals.filter((s) => s.risk_points > 0).sort((a, b) => b.risk_points - a.risk_points).slice(0, 5),

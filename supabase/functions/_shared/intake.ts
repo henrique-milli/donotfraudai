@@ -1,8 +1,9 @@
 /**
  * Session intake: envelope → verified payload → server signals → score → route → case.
  *
- * The response to the phone carries only the route (CONTINUE / STEP_UP / MANUAL_REVIEW), never the
+ * The response to the phone carries only the route (CONTINUE / MANUAL_REVIEW / BRANCH_VISIT), never the
  * reasons: the applicant-facing channel must not become an oracle an attacker can iterate against.
+ * STEP_UP remains only for analyst-requested active liveness (REQUEST_VERIFICATION), not auto-routing.
  */
 import * as audit from "./audit.ts";
 import { verify } from "./attestation.ts";
@@ -11,23 +12,30 @@ import type { Sql } from "./db.ts";
 import { type Envelope, EnvelopeError, openEnvelope } from "./envelope.ts";
 import { explain } from "./explainer.ts";
 import * as face from "./facecheck.ts";
-import { fired, score, serverSignals, type Sig, sig } from "./risk.ts";
+import { fired, scoreWithLadder, serverSignals, type Sig, sig } from "./risk.ts";
 import { sha256Hex, unb64 } from "./util.ts";
 
 export class IntakeError extends Error {}
 
-export const STATUS_FOR_ROUTE: Record<string, string> = { CONTINUE: "AUTO_APPROVED", STEP_UP: "STEP_UP_REQUESTED", MANUAL_REVIEW: "IN_TRIAGE" };
-export const OPEN = ["STEP_UP_REQUESTED", "IN_TRIAGE", "ESCALATED"];
+export const STATUS_FOR_ROUTE: Record<string, string> = {
+  CONTINUE: "AUTO_APPROVED",
+  MANUAL_REVIEW: "IN_TRIAGE",
+  BRANCH_VISIT: "BRANCH_INVITED",
+  /** Analyst-requested active liveness only — not an auto score route. */
+  STEP_UP: "STEP_UP_REQUESTED",
+};
+export const OPEN = ["STEP_UP_REQUESTED", "IN_TRIAGE", "ESCALATED", "BRANCH_INVITED"];
 export const ACTIONS = ["APPROVE", "REQUEST_VERIFICATION", "ESCALATE", "REJECT"];
 const NEXT_STATUS: Record<string, string> = { APPROVE: "APPROVED", REJECT: "REJECTED", ESCALATE: "ESCALATED", REQUEST_VERIFICATION: "STEP_UP_REQUESTED" };
+
+const assurance = (level: string, chipVerified: boolean) =>
+  level === "LOW" ? (chipVerified ? "HIGH" : "SUBSTANTIAL") : "PENDING";
+
 
 export const KIND_PATTERN = /^(rv\d{1,2}_)?(front|back|portrait|chipPhoto|selfie|burst[1-4]|active[1-6])$/;
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 export interface Img { kind: string; mime: string; width: number; height: number; sha256: string; data: Uint8Array }
-
-const assurance = (level: string, chipVerified: boolean) =>
-  level === "HIGH" ? "NONE" : level === "LOW" ? (chipVerified ? "HIGH" : "SUBSTANTIAL") : "PENDING";
 
 /** Pops payload.images (kept out of the stored JSON), validates each one, leaves a manifest. */
 // deno-lint-ignore no-explicit-any
@@ -138,11 +146,16 @@ export async function ingest(sql: Sql, env: Envelope, clientIp: string | null, d
   const srvSigs = serverSignals(v, history);
   const f = await face.analyzeSession(sql, Object.fromEntries(images.map((i) => [i.kind, i.data])), h.document_number, payload.face ?? {});
   const all = [...devSigs, ...srvSigs, ...f.signals];
-  const s = score(all);
 
   const chip = payload.chip ?? {};
   const chipVerified = devSigs.some((x) => x.grp === "CHIP" && x.label.startsWith("SOD signature") && x.outcome === "PASS") &&
     !devSigs.some((x) => x.grp === "CHIP" && x.outcome === "FAIL");
+  const ladder = scoreWithLadder(all, {
+    chipVerified,
+    chipExpected: String(chip.expectation ?? ""),
+    documentNumber: h.document_number,
+  });
+  const s = { score: ladder.score, level: ladder.level, route: ladder.route };
   const ex = explain(all, s.level, s.score, chipVerified, String(chip.expectation ?? ""));
   const build = profile.build ?? {};
 
@@ -179,6 +192,13 @@ export async function ingest(sql: Sql, env: Envelope, clientIp: string | null, d
     await audit.record(tx, c, "system", "risk_assessed", {
       score: s.score, level: s.level, route: s.route, device_score: payload.deviceVerdict?.riskScore ?? null,
       recommendation: ex.recommendation, confidence: ex.confidence,
+      ladder: {
+        confidence: ladder.confidence,
+        steps: ladder.steps.map((st) => ({
+          id: st.id, title: st.title, confidence: st.confidence, risk: st.risk, outcome: st.outcome, summary: st.summary, weight: st.weight,
+        })),
+        agent: ladder.agent ?? null,
+      },
       fired: all.filter((x) => fired(x) && x.risk_points).map((x) => `${x.grp}:${x.label}:+${x.risk_points}`),
       face: { reference: f.reference, similarity: f.similarity, liveness: f.liveness, cluster: face.clusterLabel(cluster) },
     });
@@ -205,9 +225,14 @@ export async function caseForToken(sql: Sql, sessionId: string, token: string) {
 /** Recomputes score, level, route and explanation from the stored signals. */
 // deno-lint-ignore no-explicit-any
 export async function rescore(tx: any, caseId: number) {
-  const [c] = await tx`select chip_verified, chip_expected from attest.cases where id = ${caseId}`;
-  const sigs = await tx`select grp, label, outcome, value, risk_points from attest.signals where case_id = ${caseId} order by id`;
-  const s = score(sigs);
+  const [c] = await tx`select chip_verified, chip_expected, document_number from attest.cases where id = ${caseId}`;
+  const sigs = await tx`select grp, label, outcome, value, rule, risk_points, side, source from attest.signals where case_id = ${caseId} order by id`;
+  const ladder = scoreWithLadder(sigs, {
+    chipVerified: !!c.chip_verified,
+    chipExpected: c.chip_expected ?? "",
+    documentNumber: c.document_number ?? "",
+  });
+  const s = { score: ladder.score, level: ladder.level, route: ladder.route };
   const ex = explain(sigs, s.level, s.score, c.chip_verified, c.chip_expected);
   await tx`update attest.cases set risk_score = ${s.score}, risk_level = ${s.level}, route = ${s.route},
              assurance = ${assurance(s.level, c.chip_verified)}, summary = ${ex.summary}, recommendation = ${ex.recommendation},
@@ -264,8 +289,8 @@ async function ingestReverification(sql: Sql, body: { payload: string; sig: stri
                result = ${tx.json({ passed, similarity: f.similarity, liveness: f.liveness, signals: fresh.map((s) => `${s.label}: ${s.outcome}`) })}
              where id = ${rv.id}`;
     const s = await rescore(tx, c.id);
-    // pass -> continue onboarding; fail or still uncertain -> manual review
-    const status = passed && s.level === "LOW" ? "AUTO_APPROVED" : "IN_TRIAGE";
+    // pass + high confidence → auto-approve; low confidence → branch invite; else triage
+    const status = STATUS_FOR_ROUTE[s.route] ?? (passed && s.level === "LOW" ? "AUTO_APPROVED" : "IN_TRIAGE");
     await tx`update attest.cases set status = ${status},
                face_similarity = coalesce(${f.similarity}, face_similarity),
                face_reference = case when ${f.reference} <> '' then ${f.reference} else face_reference end,

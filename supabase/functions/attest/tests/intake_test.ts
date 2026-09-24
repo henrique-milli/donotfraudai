@@ -66,6 +66,10 @@ Deno.test({ name: "intake routes the demo scenarios and keeps the audit chain in
   assertEquals(routes["Screen replay of an ID"], "HIGH");
   assertEquals(routes["Emulator with injected camera"], "HIGH");
   assert(routes["Clean chipped ID, chip verified"] !== "HIGH");
+  // auto routes: HIGH → BRANCH_VISIT (no auto-deny); MEDIUM → MANUAL_REVIEW
+  const [replay] = await sql`select route, status from attest.cases where demo_fixture and risk_level = 'HIGH' limit 1`;
+  assertEquals(replay.route, "BRANCH_VISIT");
+  assertEquals(replay.status, "BRANCH_INVITED");
   assert((await verifyChain(sql)).ok);
   await assertRejects(() => sql`update attest.audit_events set actor = 'mallory' where id = 1`);
   await assertRejects(() => intake.ingest(sql, { v: 1, alg: "x", kid: "t1", epk: "", iv: "", ct: "" } as any, null), intake.IntakeError);

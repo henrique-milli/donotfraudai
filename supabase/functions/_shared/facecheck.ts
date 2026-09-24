@@ -7,7 +7,7 @@
  *   fresh, same steps · each action visible in its frame (pose / scale change from the neutral selfie,
  *   measured by the face service, not by the phone) · opposite actions move in opposite directions ·
  *   every frame the same face · passive liveness and face-swap / deepfake check on every frame.
- *   Older builds that send a passive burst only are scored with a warning that routes to step-up.
+ *   Older builds that send a passive burst only are scored with a warning (raises the risk score).
  *   Then, as before:
  *   selfie present · one face · passive liveness over selfie + burst frames · burst frames are all the
  *   same face · face-swap / deepfake injection (services/faceswap) · 1:1 selfie vs reference (chip DG2
@@ -31,7 +31,7 @@ const w = cfg.weights;
 export const clusterLabel = (id: number | string | null) => (id == null ? null : `F-${String(id).padStart(5, "0")}`);
 export const STATUS_LABEL: Record<string, string> = {
   AUTO_APPROVED: "Auto-approved", STEP_UP_REQUESTED: "Step-up requested", IN_TRIAGE: "In triage",
-  ESCALATED: "Escalated", APPROVED: "Approved", REJECTED: "Rejected",
+  BRANCH_INVITED: "Branch visit invited", ESCALATED: "Escalated", APPROVED: "Approved", REJECTED: "Rejected",
 };
 
 /** A template to enroll in the service gallery once the case exists (the API keeps no embedding). */

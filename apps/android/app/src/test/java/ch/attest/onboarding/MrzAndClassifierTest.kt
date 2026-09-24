@@ -135,7 +135,7 @@ class MrzAndClassifierTest {
 
         // one screen-replay signal is enough, whatever the score
         val replay = listOf(chk(Group.PAD, Outcome.FAIL, 5))
-        assertEquals(Session.Verdict.REJECTED, Session.verdict(replay))
+        assertEquals(Session.Verdict.BRANCH, Session.verdict(replay))
 
         // no captured evidence is never "verified"
         assertEquals(Session.Verdict.REVIEW, Session.verdict(emptyList()))

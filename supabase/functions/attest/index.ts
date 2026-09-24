@@ -7,6 +7,8 @@
  *   POST /v1/challenges              fresh single-use attestation challenge
  *   POST /v1/face-challenges         random face actions for the selfie step {id, steps, expiresIn}
  *   POST /v1/sessions                sealed session → {session, route}; never the reasons
+ *                                    route: CONTINUE | MANUAL_REVIEW | BRANCH_VISIT
+ *                                    (STEP_UP only after analyst REQUEST_VERIFICATION)
  *   POST /v1/sessions/:id/next       {token} → NONE | ACTIVE_LIVENESS {steps}
  * Analyst-facing (header `x-analyst-token: $ANALYST_TOKEN`, `x-analyst: <name>` for the audit trail):
  *   GET  /analyst/cases?tab=&q=      queue      GET /analyst/cases/:n   case (signals, face, evidence, audit)
