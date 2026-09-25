@@ -88,7 +88,7 @@
 
 /* standalone explode animations */
 .sl-anim .sl-stage.anim { perspective: 3000px; perspective-origin: 36% 45%; }
-.sl-anim .sl-origin.anim { left: 700px; top: 560px; }
+.sl-anim .sl-origin.anim { left: 620px; top: 560px; }
 .sl-anim .x-title { font-size: 30px; bottom: calc(100% + 18px); }
 .sl-anim .x-title small { font-size: 19px; }
 .sl-anim .x-title b { font-size: 17px; padding: 5px 10px; }

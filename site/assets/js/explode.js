@@ -152,7 +152,11 @@ export function createRig(el, name, base = 'assets/') {
 
 /**
  * Pose the rig for fractional step `stepF` (0 .. steps).
- * view: { rx, rz, scale, gap, present: {x, y, scale} | null, stackFade }
+ * view: { rx, rz, scale, gap, present: {x, y, scale} | null, stackFade,
+ *         timing?: [inStart, inEnd, outStart, outEnd] }
+ * timing is relative to a layer's own step (default [0, 0.28, 0.86, 1]);
+ * values below 0 or above 1 let one layer come forward while the previous
+ * one is still going back, which keeps short clips moving.
  */
 export function pose(rig, stepF, view) {
   const { layers, spec } = rig;
@@ -160,7 +164,6 @@ export function pose(rig, stepF, view) {
   const s = clamp(Math.floor(stepF), 0, n - 1);
   const f = clamp(stepF - s);
   const step = spec.steps[s];
-  const prev = spec.steps[Math.max(0, s - 1)];
 
   // explode: step 0 opens the stack; a step with explode:0 closes it.
   let explode;
@@ -168,25 +171,31 @@ export function pose(rig, stepF, view) {
   else if (step.explode === 0) explode = 1 - smooth(0.1, 0.7, f);
   else explode = 1;
 
-  // the active layer slides out, holds, then slides back before the next step.
-  const out = step.layer == null ? 0 : smooth(0, 0.28, f) * (1 - smooth(0.86, 1, f));
+  // each presented layer slides out during its own step, holds, and returns.
+  const [a, b, c, d] = view.timing ?? [0, 0.28, 0.86, 1];
+  const P = view.present;
+  const ks = layers.map((_, i) => {
+    const j = spec.steps.findIndex(st => st.layer === i);
+    if (!P || j < 0) return 0;
+    return smooth(j + a, j + b, stepF) * (1 - smooth(j + c, j + d, stepF));
+  });
+  const out = Math.max(...ks);
   const rx = view.rx, rz = view.rz, sc = view.scale;
   const mid = (layers.length - 1) / 2;
-  const P = view.present;
 
   layers.forEach((layer, i) => {
     const z = (i - mid) * view.gap * explode + i * 0.6;
-    const k = i === step.layer && P ? out : 0;
+    const k = ks[i];
     const t = k === 0
       ? `translateZ(${z.toFixed(2)}px)`
       : `scale(${lerp(1, 1 / sc, k).toFixed(4)}) rotateZ(${(-rz * k).toFixed(3)}deg) rotateX(${(-rx * k).toFixed(3)}deg) ` +
         `translate3d(${(P.x * k).toFixed(2)}px, ${(P.y * k).toFixed(2)}px, ${(z * (1 - k)).toFixed(2)}px) scale(${lerp(1, P.scale, k).toFixed(4)})`;
     layer.style.transform = t;
-    layer.style.zIndex = k > 0 ? '10' : '';
+    layer.style.zIndex = k > 0 ? String(10 + Math.round(k * 10)) : '';
     const isOverlay = !layer.classList.contains('chassis') && !layer.classList.contains('screen') && i !== 0;
     const inStack = isOverlay ? smooth(0.3, 0.8, explode) : 1;
-    const fade = step.layer != null && i !== step.layer ? lerp(1, view.stackFade ?? 0.55, out) : 1;
-    layer.style.opacity = (Math.max(k, inStack) * fade).toFixed(3);
+    const fade = lerp(1, view.stackFade ?? 0.55, out);
+    layer.style.opacity = Math.max(k, inStack * fade).toFixed(3);
     layer.style.setProperty('--k', k.toFixed(3));
     layer.classList.toggle('presented', k > 0.5);
   });
