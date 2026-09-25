@@ -90,7 +90,7 @@ function updateGod() {
     consoleRig.querySelectorAll('[data-hot]').forEach(el => { el.style.outline = ''; });
     if (k >= 0) {
       const tg = consoleRig.querySelector(`[data-hot="${hotspots[k].dataset.for}"]`);
-      if (tg) { tg.style.outline = '3px solid #DD1122'; tg.style.outlineOffset = '3px'; }
+      if (tg) { tg.style.outline = '3px solid #11AAFF'; tg.style.outlineOffset = '3px'; }
     }
   }
   if (k >= 0) {

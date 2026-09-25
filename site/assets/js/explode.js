@@ -13,7 +13,7 @@ export const PLANE = { w: 320, h: 685 };
 
 const C = {
   navy: '#001155', blue: '#086ADB', sky: '#11AAFF', red: '#DD1122',
-  green: '#1B8712', orange: '#CF4A0C', sub: '#4A5578',
+  green: '#1B8712', lightGreen: '#2DBE6C', orange: '#CF4A0C', sub: '#4A5578',
 };
 
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -31,7 +31,7 @@ const shot = (u, img, dim) => `<img class="x-shot${dim ? ' dim' : ''}" src="${u(
 
 // ---------- layer library ----------
 const board = (label) => ({
-  id: 'device', title: 'Device trust', sub: 'Is this a real phone?', accent: C.green,
+  id: 'device', title: 'Device trust', sub: 'Is this a real phone?', accent: C.sky,
   html: () => `<div class="x-board">
     <div class="x-part" style="left:34%;top:4%;width:32%;height:7%">${label}<small>camera sensor</small></div>
     <div class="x-part" style="left:12%;top:18%;width:42%;height:14%">SoC<small>scan engine</small></div>
@@ -52,20 +52,20 @@ export const RIGS = {
       PHONE,
       { id: 'camera', title: 'Camera frame', sub: 'The raw capture', accent: C.blue, cls: 'screen', html: b => shot(b, 'doc-front.jpg') },
       {
-        id: 'quality', title: 'Quality gates', sub: 'Seven gates, live', accent: C.green,
+        id: 'quality', title: 'Quality gates', sub: 'Seven gates, live', accent: C.lightGreen,
         html: b => shot(b, 'doc-front.jpg', true) +
-          box(4.5, 24, 91, 25.5, C.green, 'CARD DETECTED · FILLS THE FRAME') +
-          card(6, 56, 88, C.green, 'LIVE QUALITY GATES', [
+          box(4.5, 24, 91, 25.5, C.lightGreen, 'CARD DETECTED · FILLS THE FRAME') +
+          card(6, 56, 88, C.lightGreen, 'LIVE QUALITY GATES', [
             row('Card · Distance', '✓'), row('Light · Glare', '✓'), row('Sharpness', '✓'), row('Fingers · Photo', '✓'),
           ]),
       },
       {
-        id: 'pad', title: 'Attack detection', sub: 'Screen, print or real?', accent: C.red,
+        id: 'pad', title: 'Attack detection', sub: 'Screen, print or real?', accent: C.sky,
         html: b => shot(b, 'doc-front.jpg', true) +
-          `<div class="x-scan" style="--c:${C.red}"></div>` +
-          box(8, 30, 31, 16.5, C.red, 'PHOTO TAMPERING ✓', true) +
-          card(6, 56, 88, C.red, 'SCREEN, PRINT OR REAL?', [
-            bar('Physical card', 0.64, C.green), bar('Screen', 0, C.red), bar('Paper', 0.36, C.orange),
+          `<div class="x-scan" style="--c:${C.sky}"></div>` +
+          box(8, 30, 31, 16.5, C.sky, 'PHOTO TAMPERING ✓', true) +
+          card(6, 56, 88, C.sky, 'SCREEN, PRINT OR REAL?', [
+            bar('Physical card', 0.64, C.green), bar('Screen', 0, C.sky), bar('Paper', 0.36, C.orange),
             row('Moiré · Colour', '✓'),
           ]),
       },
@@ -105,7 +105,7 @@ export const RIGS = {
           `<div class="x-arc" style="left:20%;top:14%;width:60%;height:10%"></div>`,
       },
       {
-        id: 'match', title: 'Face ↔ document', sub: 'Not the holder', accent: C.red,
+        id: 'match', title: 'Face ↔ document', sub: 'Not the holder', accent: C.sky,
         html: b => shot(b, 'face.jpg', true) +
           `<div class="x-match">
             <div class="pair"><div class="p" style="background-image:url(${b('img/face.jpg')})"></div><span>vs</span><div class="p dg2"><em>CHIP DG2</em></div></div>

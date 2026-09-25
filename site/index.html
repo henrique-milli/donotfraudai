@@ -51,19 +51,24 @@
     <div class="wrap">
       <div class="head reveal">
         <span class="eyebrow">How it works</span>
-        <h2>Four steps. <span class="blue">One score</span>, on the server.</h2>
-        <p class="lede">The applicant finishes every step, the phone seals the session, and the server scores it once. The phone only learns the route, never the reason.</p>
+        <h2>What happens between <span class="blue">Start</span> and <span class="blue">You're all set</span>.</h2>
+        <p class="lede">About a minute for the applicant. The phone collects and seals the evidence, our server scores it once and picks a route. The applicant never sees the score.</p>
       </div>
-      <div class="ladder">
-        <div class="rung reveal" style="--accent:var(--green)"><div class="w">01 · DEVICE</div><h4>Real phone</h4><p>Hardware key attestation, boot state, root and hook checks.</p></div>
-        <div class="rung reveal" style="--accent:var(--blue)"><div class="w">02 · DOCUMENT</div><h4>Real card</h4><p>Quality gates, screen and print detection, MRZ check digits.</p></div>
-        <div class="rung reveal" style="--accent:var(--sky)"><div class="w">03 · CHIP</div><h4>Genuine card</h4><p>NFC chip must match the print and carry the issuer's signature.</p></div>
-        <div class="rung reveal" style="--accent:var(--red)"><div class="w">04 · FACE</div><h4>Live, unique human</h4><p>Random challenge, 1:1 vs the chip photo, 1:N across all sessions.</p></div>
-      </div>
-      <div class="routes">
-        <div class="route reveal" style="--c:var(--green)"><i></i><div><b>CONTINUE</b><span>High confidence, auto-approve</span></div></div>
-        <div class="route reveal" style="--c:var(--orange)"><i></i><div><b>MANUAL REVIEW</b><span>An analyst checks the evidence</span></div></div>
-        <div class="route reveal" style="--c:var(--red)"><i></i><div><b>BRANCH VISIT</b><span>Polite invite, never a hard deny</span></div></div>
+      <ol class="flow reveal">
+        <li><figure class="thumb"><img src="assets/img/start.jpg" alt="" /></figure><span class="k">01 · weight 20%</span><b>The phone</b><p>Hardware key attestation, boot state, root and hooks.</p></li>
+        <li><figure class="thumb"><img src="assets/img/doc-front.jpg" alt="" /></figure><span class="k">02 · weight 25%</span><b>The card</b><p>Quality gates, screen and print checks, MRZ check digits.</p></li>
+        <li><figure class="thumb"><img src="assets/img/chip.jpg" alt="" /></figure><span class="k">03 · weight 30%</span><b>The chip</b><p>Must match the print and carry the issuer's signature.</p></li>
+        <li><figure class="thumb"><img src="assets/img/face.jpg" alt="" /></figure><span class="k">04 · weight 25%</span><b>The face</b><p>Random challenge, 1:1 with the chip photo, 1:N across sessions.</p></li>
+      </ol>
+      <div class="scale reveal">
+        <div class="scale-head"><b>Risk score</b><span>0 is clean, 100 is stop</span></div>
+        <div class="scale-bar">
+          <span style="flex:25">Continue<small>under 25 · auto-approve</small></span>
+          <span style="flex:35">Manual review<small>25 to 59 · an analyst decides</small></span>
+          <span style="flex:40">Branch visit<small>60 and up · invited in, never auto-rejected</small></span>
+          <i class="marker"><em>Our rooted test phone scored 100</em></i>
+        </div>
+        <div class="scale-ticks"><span>0</span><span style="left:25%">25</span><span style="left:60%">60</span><span style="left:100%">100</span></div>
       </div>
     </div>
   </section>
@@ -98,7 +103,7 @@
           <div class="model">
             <h5>SCENE MODEL</h5>
             <div class="row"><span>Physical card</span><span data-v="phys">0.64</span></div><div class="bar" style="--c:var(--green)"><i data-b="phys"></i></div>
-            <div class="row"><span>Screen</span><span data-v="screen">0.00</span></div><div class="bar" style="--c:var(--red)"><i data-b="screen"></i></div>
+            <div class="row"><span>Screen</span><span data-v="screen">0.00</span></div><div class="bar" style="--c:var(--light-blue)"><i data-b="screen"></i></div>
             <div class="row"><span>Paper</span><span data-v="paper">0.36</span></div><div class="bar" style="--c:var(--orange)"><i data-b="paper"></i></div>
             <div class="verdict ok" id="verdict">✓ No attack detected</div>
           </div>
@@ -120,7 +125,7 @@
         <div class="step" style="--accent:var(--green)"><div class="num">01 · DEVICE TRUST</div><h3>The same attested phone.</h3><p>The key that signs the challenge lives in StrongBox. A virtual camera already costs points.</p></div>
         <div class="step" style="--accent:var(--blue)"><div class="num">02 · SELFIE</div><h3>A clean, frontal face.</h3><ul class="facts"><li><b>Face detection</b> (YuNet)</li><li><b>Centered, lit, eyes open</b></li><li><b>Passive liveness</b> on every frame</li></ul></div>
         <div class="step" style="--accent:var(--blue)"><div class="num">03 · RANDOM CHALLENGE</div><h3>Moves nobody can pre-record.</h3><p>Three actions drawn by the server when the camera opens, always one head turn. Live face swaps lose tracking on the turn.</p></div>
-        <div class="step" style="--accent:var(--red)"><div class="num">04 · FACE ↔ DOCUMENT</div><h3>Is it the holder? <span class="red">Not this time.</span></h3><p>The selfie is matched against the chip's signed photo. In our recorded run it wasn't the card holder, and the face step went red.</p></div>
+        <div class="step" style="--accent:var(--light-blue)"><div class="num">04 · FACE ↔ DOCUMENT</div><h3>Is it the holder? <span class="red">Not this time.</span></h3><p>The selfie is matched against the chip's signed photo. In our recorded run it wasn't the card holder, so the face step failed.</p></div>
         <div class="step" style="--accent:var(--green)"><div class="num">05 · UNIQUENESS</div><h3>One face, how many identities?</h3><p>Every selfie is searched against all others. On real hardware, four attempts by one person were linked into one cluster.</p></div>
         <div class="dots"></div>
       </div>
