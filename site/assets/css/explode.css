@@ -26,6 +26,8 @@
   font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--navy);
   opacity: var(--k, 0);
 }
+.x-title span { display: flex; flex-direction: column; line-height: 1.15; }
+.x-title small { font-size: 14px; font-weight: 600; letter-spacing: 0; color: #4a5578; margin-top: 3px; }
 .x-title b {
   font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
   color: #fff; background: var(--accent); padding: 4px 8px; border-radius: 8px;

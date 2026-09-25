@@ -1,7 +1,7 @@
 import React from 'react';
 import { Composition, registerRoot } from 'remotion';
 // Plain ES module shared with the website.
-import { SLIDES } from '../../site/assets/js/slides-core.js';
+import { ANIMS, SLIDES } from '../../site/assets/js/slides-core.js';
 import { Slide } from './Slide';
 
 const FPS = 30;
@@ -22,6 +22,18 @@ export const Root: React.FC = () => (
         height={1080}
       />
     ))}
+    {(ANIMS as Array<{ id: string; dur: number }>).flatMap(a => [false, true].map(clear => (
+      <Composition
+        key={`${a.id}-${clear}`}
+        id={`anim-${a.id}${clear ? '-transparent' : ''}`}
+        component={Slide}
+        defaultProps={{ id: a.id, anim: true, transparent: clear }}
+        durationInFrames={Math.round(a.dur * FPS)}
+        fps={FPS}
+        width={1920}
+        height={1080}
+      />
+    )))}
   </>
 );
 

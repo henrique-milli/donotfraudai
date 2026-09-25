@@ -196,7 +196,7 @@ export const SLIDES = [
   { id: 'triage', label: 'Triage console', dur: 12.5 },
   { id: 'close', label: 'Close', dur: 5 },
 ];
-export { STEP };
+export { STEP, ANIM_STEP };
 
 /**
  * @param {HTMLElement} el
@@ -212,4 +212,57 @@ export function mountSlide(el, id, base = 'assets/') {
   if (id === 'fraud') return fraudSlide(el, u);
   if (id === 'triage') return triageSlide(el, u);
   return titleSlide(el, u, id === 'close');
+}
+
+/* ---------- standalone explode animations (dedicated Canva slides) ----------
+ * Just the phone: no brand, no text column, so the deck can add its own copy.
+ * Each clip opens from a closed phone and closes again, so it loops cleanly.
+ * The stack drifts slowly the whole time so the frame never sits still.
+ */
+const ANIM_STEP = 3.4;
+
+export const ANIMS = [
+  { id: 'doc', label: 'Document explode', steps: 7 },
+  { id: 'face', label: 'Face explode', steps: 7 },
+].map(a => ({ ...a, dur: a.steps * ANIM_STEP }));
+
+/**
+ * @param {HTMLElement} el
+ * @param {'doc' | 'face'} id
+ * @param {string | ((p: string) => string)} [base]
+ * @param {{ transparent?: boolean }} [opts]
+ */
+export function mountAnim(el, id, base = 'assets/', opts = {}) {
+  const u = typeof base === 'function' ? base : p => base + p;
+  el.classList.add('sl', 'sl-anim');
+  if (opts.transparent) el.classList.add('sl-clear');
+  el.innerHTML = `<div class="sl-stage anim"><div class="sl-origin anim"><div class="sl-rig"></div></div></div>`;
+  const origin = el.querySelector('.sl-origin');
+  const rig = createRig(el.querySelector('.sl-rig'), id, u);
+  // The face rig ends on uniqueness; close the phone again so the clip loops.
+  const steps = rig.spec.steps.at(-1).explode === 0 ? rig.spec.steps : [...rig.spec.steps, { layer: null, explode: 0 }];
+  rig.spec = { ...rig.spec, steps };
+  const n = steps.length;
+  return {
+    duration: n * ANIM_STEP,
+    render(t) {
+      const stepF = clamp(t / ANIM_STEP, 0, n - 0.001);
+      const drift = Math.sin((t / (n * ANIM_STEP)) * Math.PI * 2);
+      // Camera: the closed phone sits centre frame; while layers are being
+      // presented the stack slides left to make room on the right.
+      const s = Math.floor(stepF), f = stepF - s;
+      const has = i => (steps[i] && steps[i].layer != null ? 1 : 0);
+      const w = has(s) + (has(s + 1) - has(s)) * smooth(s === 0 ? 0.55 : 0.82, 1, f);
+      const ox = 960 - 340 * clamp(w);
+      origin.style.left = `${ox.toFixed(1)}px`;
+      pose(rig, stepF, {
+        rx: 57 + drift * 2,
+        rz: -34 + drift * 6,
+        scale: 0.9,
+        gap: 92,
+        stackFade: 0.35,
+        present: { x: 1260 - ox, y: 52, scale: 1.16 },
+      });
+    },
+  };
 }

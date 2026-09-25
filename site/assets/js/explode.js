@@ -31,7 +31,7 @@ const shot = (u, img, dim) => `<img class="x-shot${dim ? ' dim' : ''}" src="${u(
 
 // ---------- layer library ----------
 const board = (label) => ({
-  id: 'device', title: 'Device trust', accent: C.green,
+  id: 'device', title: 'Device trust', sub: 'Is this a real phone?', accent: C.green,
   html: () => `<div class="x-board">
     <div class="x-part" style="left:34%;top:4%;width:32%;height:7%">${label}<small>camera sensor</small></div>
     <div class="x-part" style="left:12%;top:18%;width:42%;height:14%">SoC<small>scan engine</small></div>
@@ -50,9 +50,9 @@ export const RIGS = {
     layers: [
       board('CAMERA'),
       PHONE,
-      { id: 'camera', title: 'Camera frame', accent: C.blue, cls: 'screen', html: b => shot(b, 'doc-front.jpg') },
+      { id: 'camera', title: 'Camera frame', sub: 'The raw capture', accent: C.blue, cls: 'screen', html: b => shot(b, 'doc-front.jpg') },
       {
-        id: 'quality', title: 'Quality gates', accent: C.green,
+        id: 'quality', title: 'Quality gates', sub: 'Seven gates, live', accent: C.green,
         html: b => shot(b, 'doc-front.jpg', true) +
           box(4.5, 24, 91, 25.5, C.green, 'CARD DETECTED · FILLS THE FRAME') +
           card(6, 56, 88, C.green, 'LIVE QUALITY GATES', [
@@ -60,7 +60,7 @@ export const RIGS = {
           ]),
       },
       {
-        id: 'pad', title: 'Attack detection', accent: C.red,
+        id: 'pad', title: 'Attack detection', sub: 'Screen, print or real?', accent: C.red,
         html: b => shot(b, 'doc-front.jpg', true) +
           `<div class="x-scan" style="--c:${C.red}"></div>` +
           box(8, 30, 31, 16.5, C.red, 'PHOTO TAMPERING ✓', true) +
@@ -70,7 +70,7 @@ export const RIGS = {
           ]),
       },
       {
-        id: 'chip', title: 'MRZ + NFC chip', accent: C.blue,
+        id: 'chip', title: 'MRZ + NFC chip', sub: 'Read it, then prove it', accent: C.blue,
         html: b => shot(b, 'doc-back.jpg', true) +
           box(10, 42.3, 78, 7.3, C.blue, 'MRZ · CHECK DIGITS ✓') +
           `<div class="x-waves" style="left:50%;top:32%"><i></i><i></i><i></i></div>` +
@@ -90,12 +90,12 @@ export const RIGS = {
       board('FRONT CAM'),
       PHONE,
       {
-        id: 'selfie', title: 'Selfie + gates', accent: C.blue, cls: 'screen',
+        id: 'selfie', title: 'Selfie + gates', sub: 'Clean, frontal, live', accent: C.blue, cls: 'screen',
         html: b => shot(b, 'face.jpg') + box(24, 22, 52, 33, C.sky, 'FACE · YUNET') +
           [[36, 32.5], [62.5, 32.5], [50, 38.5], [41, 45.5], [59, 45.5]].map(([x, y]) => `<i class="x-dot" style="left:${x}%;top:${y}%"></i>`).join(''),
       },
       {
-        id: 'challenge', title: 'Random challenge', accent: C.blue,
+        id: 'challenge', title: 'Random challenge', sub: 'Moves nobody can pre-record', accent: C.blue,
         html: b => shot(b, 'face.jpg', true) +
           `<div class="x-chal" style="left:6%;top:60%;width:88%">
             <h6>SERVER CHALLENGE · SINGLE USE</h6>
@@ -105,7 +105,7 @@ export const RIGS = {
           `<div class="x-arc" style="left:20%;top:14%;width:60%;height:10%"></div>`,
       },
       {
-        id: 'match', title: 'Face ↔ document', accent: C.red,
+        id: 'match', title: 'Face ↔ document', sub: 'Not the holder', accent: C.red,
         html: b => shot(b, 'face.jpg', true) +
           `<div class="x-match">
             <div class="pair"><div class="p" style="background-image:url(${b('img/face.jpg')})"></div><span>vs</span><div class="p dg2"><em>CHIP DG2</em></div></div>
@@ -115,7 +115,7 @@ export const RIGS = {
           </div>`,
       },
       {
-        id: 'unique', title: 'Uniqueness 1:N', accent: C.green,
+        id: 'unique', title: 'Uniqueness 1:N', sub: 'One face, how many IDs?', accent: C.green,
         html: () => `<div class="x-gallery">${Array.from({ length: 20 }, (_, i) => `<span class="${[6, 7, 11, 12].includes(i) ? 'hit' : ''}"></span>`).join('')}</div>` +
           card(6, 66, 88, C.green, 'ONE FACE, HOW MANY IDS?', [
             row('pgvector · HNSW search', '✓'), row('Cluster F-00001', '4 sessions', C.orange),
@@ -144,7 +144,7 @@ export function createRig(el, name, base = 'assets/') {
     <div class="x-layer ${l.cls ?? 'ovl'}" style="--accent:${l.accent}">
       ${i === 1 ? '<div class="x-shadow"></div>' : ''}
       <div class="x-plane">${l.html(url)}</div>
-      <div class="x-title">${num(i) ? `<b>${num(i)}</b>` : ''}${l.title}</div>
+      <div class="x-title">${num(i) ? `<b>${num(i)}</b>` : ''}<span>${l.title}${l.sub ? `<small>${l.sub}</small>` : ''}</span></div>
     </div>`).join('');
   const layers = [...el.querySelectorAll('.x-layer')];
   return { el, spec, layers, steps: spec.steps.length };

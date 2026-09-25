@@ -85,3 +85,11 @@
 .sl-title .chips span:first-child { border-color: #DD1122; color: #DD1122; }
 .sl-title .repo { margin-top: 40px; font-family: 'JetBrains Mono', monospace; font-size: 30px; color: #086ADB; }
 .sl-title .event { margin-top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A93AD; }
+
+/* standalone explode animations */
+.sl-anim .sl-stage.anim { perspective: 3000px; perspective-origin: 36% 45%; }
+.sl-anim .sl-origin.anim { left: 700px; top: 560px; }
+.sl-anim .x-title { font-size: 30px; bottom: calc(100% + 18px); }
+.sl-anim .x-title small { font-size: 19px; }
+.sl-anim .x-title b { font-size: 17px; padding: 5px 10px; }
+.sl.sl-clear { background: transparent; }

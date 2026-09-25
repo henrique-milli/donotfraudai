@@ -1,15 +1,16 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 // Plain ES module shared with the website.
-import { mountSlide } from '../../site/assets/js/slides-core.js';
+import { mountAnim, mountSlide } from '../../site/assets/js/slides-core.js';
 import '../../site/assets/css/explode.css';
 import '../../site/assets/css/console.css';
 import '../../site/assets/css/slides.css';
 
 type Api = { render: (t: number) => void };
 
-/** One pitch slide, rendered by the exact code the website's slides.html runs. */
-export const Slide: React.FC<{ id: string }> = ({ id }) => {
+/** One pitch slide (or a standalone explode animation), rendered by the
+ *  exact code the website's slides.html runs. */
+export const Slide: React.FC<{ id: string; anim?: boolean; transparent?: boolean }> = ({ id, anim, transparent }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const ref = useRef<HTMLDivElement>(null);
@@ -18,7 +19,8 @@ export const Slide: React.FC<{ id: string }> = ({ id }) => {
 
   useLayoutEffect(() => {
     const el = ref.current!;
-    api.current = mountSlide(el, id, (p: string) => staticFile(`site/${p}`));
+    const url = (p: string) => staticFile(`site/${p}`);
+    api.current = anim ? mountAnim(el, id as 'doc' | 'face', url, { transparent }) : mountSlide(el, id, url);
     api.current!.render(frame / fps);
     const imgs = [...el.querySelectorAll('img')];
     Promise.all([
