@@ -4,340 +4,132 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DoNotFraudAI · Neutralizing AI Fraud Era Threats</title>
-  <meta name="description" content="Identity onboarding that proves a real human, a real document and a unique person: hardware-attested phone, on-device presentation-attack detection, NFC chip, randomized face challenges and 1:N uniqueness." />
+  <meta name="description" content="Identity onboarding that proves a real phone, a real document, a live human and a unique person." />
   <meta property="og:title" content="DoNotFraudAI · Neutralizing AI Fraud Era Threats" />
   <meta property="og:description" content="Proof of Human and Proof of Uniqueness for digital onboarding. Zürich Hackathon 2026." />
   <meta property="og:image" content="assets/img/og.jpg" />
-  <meta name="theme-color" content="#07080a" />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="icon" href="assets/img/shield.svg" type="image/svg+xml" />
-  <link rel="preload" href="assets/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="assets/css/site.css" />
+  <link rel="stylesheet" href="assets/css/explode.css" />
+  <link rel="stylesheet" href="assets/css/console.css" />
 </head>
 <body>
-  <div class="backdrop"><div class="grid"></div><div class="orb a"></div><div class="orb b"></div></div>
-
-  <!-- ============ NAV ============ -->
   <nav class="nav" id="nav">
     <a class="brand" href="#top"><img src="assets/img/shield.svg" alt="" /><span>DoNotFraud<b>AI</b></span></a>
     <div class="links">
-      <a href="#path">Confidence path</a>
+      <a href="#path">How it works</a>
       <a href="#document">Document</a>
       <a href="#fraud">Fraud path</a>
       <a href="#face">Face</a>
       <a href="#triage">Triage</a>
-      <a href="#attacks">Attacks</a>
-      <a href="#film">Film</a>
+      <a href="slides.html">Slides</a>
     </div>
     <div class="cta">
-      <a class="btn sm" data-link="slides" href="#" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Slides
-      </a>
-      <a class="btn sm primary" data-link="repo" href="#" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub
-      </a>
+      <a class="btn sm" data-link="slides" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Deck</a>
+      <a class="btn sm primary" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
     </div>
   </nav>
 
-  <!-- ============ HERO ============ -->
   <header class="hero" id="top">
     <div class="wrap">
       <div>
-        <span class="eyebrow">Zürich Hackathon 2026 · Identity fraud in the age of AI</span>
-        <h1>Make every fraud attempt<br />cost a <span class="hot">new human.</span></h1>
-        <p class="lede">
-          AI lets one fraudster be a thousand people. DoNotFraudAI checks what a good branch clerk checks, at scale:
-          a real phone, a real document, a live human, and a face that has not onboarded before.
-          <b style="color:var(--text)">Proof of Human. Proof of Uniqueness.</b>
-        </p>
+        <span class="eyebrow">Zürich Hackathon 2026</span>
+        <h1>Make every fraud attempt cost a <span class="red">new human.</span></h1>
+        <p class="lede">AI lets one fraudster be a thousand people. We check a real phone, a real document, a live human and a face that hasn't onboarded before. Proof of Human, Proof of Uniqueness.</p>
         <div class="actions">
-          <a class="btn primary" href="#film">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch the film
-          </a>
-          <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Source code
-          </a>
-          <a class="btn" data-link="slides" href="#" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Slide deck
-          </a>
-        </div>
-        <div class="tags">
-          <span class="tag"><i>✓</i>Deepfakes</span>
-          <span class="tag"><i>✓</i>Screen replays</span>
-          <span class="tag"><i>✓</i>Printed copies</span>
-          <span class="tag"><i>✓</i>Photo swaps</span>
-          <span class="tag"><i>✓</i>Chip downgrade</span>
-          <span class="tag"><i>✓</i>Rooted phones</span>
-          <span class="tag"><i>✓</i>One face, many IDs</span>
+          <a class="btn primary" href="#document">See how it works</a>
+          <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Source</a>
+          <a class="btn" href="slides.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Pitch slides</a>
         </div>
       </div>
-      <div class="hero-art">
-        <div class="stage"><div class="rig" id="heroRig" data-rig="hero"></div></div>
-      </div>
+      <div class="hero-art"><div class="origin"><div id="heroRig"></div></div></div>
     </div>
   </header>
 
-  <!-- ============ THESIS ============ -->
-  <section id="thesis">
+  <section id="path" class="alt">
     <div class="wrap">
-      <div class="section-head center reveal">
-        <span class="eyebrow">The thesis</span>
-        <h2>In-person ID was never perfect.<br /><span class="hot">AI scales</span> the shortcuts.</h2>
-        <p class="lede">A calm person who looks like a decade-old photo is good enough at a counter. Society runs on shallow identity assumptions, and AI turns every one of them into a script. We don't need to beat the clerk. We need to be at least as good, everywhere, all the time.</p>
-      </div>
-      <div class="thesis">
-        <div class="tcard reveal"><div class="big" style="color:var(--red)">PoH</div><h4>Proof of Human</h4><p>Random actions issued when the camera opens can't be filmed in advance. Every attempt needs a real person, in real time. That's labour a fraud operation has to pay for.</p></div>
-        <div class="tcard reveal"><div class="big" style="color:var(--green)">PoU</div><h4>Proof of Uniqueness</h4><p>A 1:N search over every live selfie links one face to many documents. The next scam needs a new human, not a new PDF.</p></div>
-        <div class="tcard reveal"><div class="big" style="color:var(--sky)">Mules</div><h4>Residual risk looks like mules</h4><p>Even if a document gets forged, what's left is mule economics, not AI-agent scale. Each account costs a body, and every body can only be used once.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CONFIDENCE PATH ============ -->
-  <section id="path">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow green">Confidence path</span>
-        <h2>A fixed sequence.<br /><span class="ok">One score</span>, server side.</h2>
-        <p class="lede">There's no mid-flow exit and no oracle. The applicant finishes every step, the phone seals the session, and the server scores it once from raw signals. The phone only ever learns a route.</p>
+      <div class="head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2>Four steps. <span class="blue">One score</span>, on the server.</h2>
+        <p class="lede">The applicant finishes every step, the phone seals the session, and the server scores it once. The phone only learns the route, never the reason.</p>
       </div>
       <div class="ladder">
-        <div class="rung reveal" style="--accent:var(--amber)"><div class="w">01 · WEIGHT 20%</div><h4>Device</h4><p>Hardware key attestation, boot state, root, hooks, emulator, injected camera, hand-held motion.</p><i class="fill"></i></div>
-        <div class="rung reveal" style="--accent:var(--sky)"><div class="w">02 · WEIGHT 25%</div><h4>Document photos</h4><p>Live quality gates, presentation-attack checks, OCR, MRZ check digits, Swiss template, cross-checks.</p><i class="fill"></i></div>
-        <div class="rung reveal" style="--accent:var(--green)"><div class="w">03 · WEIGHT 30%</div><h4>Chip or agent</h4><p>NFC chip preferred: PACE/BAC, DG1 = printed MRZ, SOD signature. No chip? A document agent fills in.</p><i class="fill"></i></div>
-        <div class="rung reveal" style="--accent:var(--violet)"><div class="w">04 · WEIGHT 25%</div><h4>Face</h4><p>Randomized actions (PoH), liveness, face-swap check, 1:1 vs chip photo, 1:N uniqueness (PoU).</p><i class="fill"></i></div>
+        <div class="rung reveal" style="--accent:var(--green)"><div class="w">01 · DEVICE</div><h4>Real phone</h4><p>Hardware key attestation, boot state, root and hook checks.</p></div>
+        <div class="rung reveal" style="--accent:var(--blue)"><div class="w">02 · DOCUMENT</div><h4>Real card</h4><p>Quality gates, screen and print detection, MRZ check digits.</p></div>
+        <div class="rung reveal" style="--accent:var(--sky)"><div class="w">03 · CHIP</div><h4>Genuine card</h4><p>NFC chip must match the print and carry the issuer's signature.</p></div>
+        <div class="rung reveal" style="--accent:var(--red)"><div class="w">04 · FACE</div><h4>Live, unique human</h4><p>Random challenge, 1:1 vs the chip photo, 1:N across all sessions.</p></div>
       </div>
       <div class="routes">
-        <div class="route reveal" style="--c:var(--green)"><span class="rng">risk &lt; 25</span><div class="k">CONTINUE</div><h4>Auto-approve</h4><p>High confidence. Skips the human in the loop.</p></div>
-        <div class="route reveal" style="--c:var(--amber)"><span class="rng">25 – 59</span><div class="k">MANUAL_REVIEW</div><h4>Online analyst</h4><p>Medium confidence. Lands in the triage console with every signal.</p></div>
-        <div class="route reveal" style="--c:var(--red)"><span class="rng">≥ 60</span><div class="k">BRANCH_VISIT</div><h4>Polite branch invite</h4><p>Low confidence. Annoying but appealable. There's never a hard auto-deny.</p></div>
+        <div class="route reveal" style="--c:var(--green)"><i></i><div><b>CONTINUE</b><span>High confidence, auto-approve</span></div></div>
+        <div class="route reveal" style="--c:var(--orange)"><i></i><div><b>MANUAL REVIEW</b><span>An analyst checks the evidence</span></div></div>
+        <div class="route reveal" style="--c:var(--red)"><i></i><div><b>BRANCH VISIT</b><span>Polite invite, never a hard deny</span></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ DOCUMENT EXPLODED ============ -->
-  <section id="document" class="scrolly" data-scene="doc" style="--len:900vh">
+  <section id="document" class="scene" data-rig="doc" style="--len:780vh">
     <div class="sticky">
-      <div class="stage"><div class="rig" id="docRig" data-rig="doc"></div></div>
-      <div class="steps">
-        <div class="kicker">Document · exploded view</div>
-
-        <div class="step-card" data-step="0" style="--accent:var(--red)">
-          <div class="num">ONE PHOTO</div>
-          <h3>Seven layers look at every frame.</h3>
-          <p>From the silicon under the camera to the sealed payload leaving the phone, each layer adds signals the server re-checks. Scroll to take the phone apart.</p>
-        </div>
-
-        <div class="step-card" data-step="1" style="--accent:var(--green)">
-          <div class="num">LAYER 1 · BELOW THE CAMERA</div>
-          <h3>Is this a real phone?</h3>
-          <p>Before trusting a pixel, we check the hardware that produced it. A key is minted in StrongBox (or the TEE) with the server's challenge baked in, and the server re-parses the certificate chain itself.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Hardware key attestation</b><span>StrongBox, TEE fallback · challenge-bound</span></div><em>+25</em></li>
-            <li><i class="ic">✓</i><div><b>Boot state consistency</b><span>OS properties vs attested boot · catches hidden Magisk</span></div><em>+40</em></li>
-            <li><i class="ic">✓</i><div><b>Emulator · hooks · root</b><span>goldfish/ranchu · Frida/Xposed in /proc/self/maps · su paths</span></div><em>+60</em></li>
-            <li><i class="ic">✓</i><div><b>Hand-held motion</b><span>gyro RMS ≥ 0.004 rad/s · ≥ 1.2 s per side</span></div><em>+10</em></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="2" style="--accent:var(--sky)">
-          <div class="num">LAYER 2 · CAMERA</div>
-          <h3>The raw frame, analysed live.</h3>
-          <p>CameraX streams 1920×1080 frames into the scan engine. The still is only taken once two consecutive frames pass every gate, and at maximum quality.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Preview analysis</b><span>1920×1080 · CameraX 1.4</span></div></li>
-            <li><i class="ic">✓</i><div><b>Capture trigger</b><span>2 passing frames in a row · MAXIMIZE_QUALITY</span></div></li>
-            <li><i class="ic">✓</i><div><b>Front, flip, back</b><span>card-flip timing is recorded as behaviour</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="3" style="--accent:var(--green)">
-          <div class="num">LAYER 3 · QUALITY GATES</div>
-          <h3>Seven gates before a single capture.</h3>
-          <p>The applicant gets plain guidance ("Glare on the card", "Finger over the card"). The same measurements become signals for the risk engine.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Card detected · Distance</b><span>card fills the frame</span></div></li>
-            <li><i class="ic">✓</i><div><b>Lighting · Glare</b><span>brightness · glare ROI % vs full-card %</span></div></li>
-            <li><i class="ic">✓</i><div><b>Sharpness</b><span>low / med / high blur histogram</span></div></li>
-            <li><i class="ic">✓</i><div><b>Fingers on card · Photo / MRZ</b><span>portrait legible on front · MRZ readable on back</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="4" style="--accent:var(--red)">
-          <div class="num">LAYER 4 · PRESENTATION ATTACKS</div>
-          <h3>Screen, print or real?</h3>
-          <p>Four independent checks run on the still. If one misses, another catches it. Results are scored and sealed. The applicant never sees them.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Physical document · scene model</b><span>phys 0.64 · screen 0.00 · paper 0.36 · rule phys &gt; 0.5</span></div><em>+70</em></li>
-            <li><i class="ic">✓</i><div><b>Screen pattern (moiré)</b><span>0.60 · rule ≤ 4.0</span></div><em>+60</em></li>
-            <li><i class="ic">✓</i><div><b>Colour document</b><span>colourfulness test · not a B/W photocopy</span></div><em>+45</em></li>
-            <li><i class="ic">✓</i><div><b>ID photo tampering</b><span>portrait region · rule &lt; 0.70</span></div><em>+70</em></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="5" style="--accent:var(--violet)">
-          <div class="num">LAYER 5 · DOCUMENT UNDERSTANDING</div>
-          <h3>Read it. Then doubt it.</h3>
-          <p>ML Kit OCR reads both sides. The MRZ must parse with valid check digits before the back is even captured, and everything printed on the front is cross-checked against it.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>MRZ · ICAO 9303 TD1</b><span>3×30 · 7-3-1 check digits · doc no, birth, expiry, composite</span></div></li>
-            <li><i class="ic">✓</i><div><b>Swiss classifier</b><span>title OCR DE/FR/IT/RM/EN · state marking · issuer CHE</span></div></li>
-            <li><i class="ic">✓</i><div><b>Front ↔ MRZ cross-checks</b><span>number · birth date · surname · valid · age ≥ 18</span></div><em>+60</em></li>
-            <li><i class="ic">✓</i><div><b>ICAO chip symbol</b><span>OpenCV template · 13 scales × 2 styles · 0.71 ≥ 0.25</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="6" style="--accent:var(--amber)">
-          <div class="num">LAYER 6 · NFC CHIP</div>
-          <h3>A signature a printer can't fake.</h3>
-          <p>A chip symbol on the card plus an NFC phone makes the chip read <b style="color:var(--text)">required</b>. That shuts the downgrade path. The chip's data must match the print and verify against the issuer's signature.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>PACE / BAC</b><span>session keyed from the printed MRZ · JMRTD</span></div></li>
-            <li><i class="ic">✓</i><div><b>DG1 = printed MRZ</b><span>chip and print must agree</span></div><em>+80</em></li>
-            <li><i class="ic">✓</i><div><b>Passive authentication</b><span>DG1/2/11/12/14 hashes · SOD signed by Document Signer</span></div><em>+90</em></li>
-            <li><i class="ic info">i</i><div><b>Chain to Swiss CSCA</b><span>master list not bundled yet</span></div><em style="color:var(--muted)">roadmap</em></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="7" style="--accent:var(--red)">
-          <div class="num">LAYER 7 · SEALED</div>
-          <h3>Sealed on the phone. Rescored on the server.</h3>
-          <p>The payload is encrypted to the server and signed by the attested key over a single-use challenge. The server trusts nothing the phone claims. It re-derives every score from raw signals.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>ECDH-ES P-256 → HKDF-SHA256 → AES-256-GCM</b><span>AAD attest|v1|kid</span></div></li>
-            <li><i class="ic">✓</i><div><b>ECDSA P-256 by the attested key</b><span>replayed challenge +80 · bad signature +80</span></div></li>
-            <li><i class="ic">✓</i><div><b>No oracle</b><span>the phone learns a route, never a score or a reason</span></div></li>
-          </ul>
-        </div>
-
-        <div class="progress-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="stage"><div class="origin"><div class="rig-el"></div></div></div>
+      <div class="copy">
+        <span class="eyebrow kicker">Document · taken apart</span>
+        <div class="step" style="--accent:var(--blue)"><div class="num">ONE PHOTO</div><h3>Five layers check every frame.</h3><p>Scroll to take the phone apart. Each layer comes forward so you can read it.</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">01 · DEVICE TRUST</div><h3>Is this a real phone?</h3><p>We check the hardware before trusting a pixel.</p><ul class="facts"><li><b>Hardware key attestation</b>, bound to our challenge</li><li><b>Boot state</b> vs attested boot catches hidden root</li><li><b>Emulators, hooks, virtual cameras</b></li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">02 · CAMERA</div><h3>The raw frame.</h3><p>Real footage from our Pixel 6. The still is only taken after two good frames in a row.</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">03 · QUALITY GATES</div><h3>Seven gates, live.</h3><ul class="facts"><li><b>Card</b> detected and filling the frame</li><li><b>Light, glare, sharpness</b></li><li><b>No fingers</b>, portrait or MRZ readable</li></ul></div>
+        <div class="step" style="--accent:var(--red)"><div class="num">04 · ATTACK DETECTION</div><h3>Screen, print or real?</h3><p>Four checks on the still. If one misses, another catches it.</p><ul class="facts"><li><b>Scene model</b>: physical 0.64, screen 0.00</li><li><b>Moiré</b> and <b>colour</b> checks</li><li><b>Photo tampering</b> on the portrait</li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">05 · MRZ + CHIP</div><h3>Read it, then prove it.</h3><ul class="facts"><li><b>MRZ</b> check digits must be valid</li><li><b>Chip data</b> must match the print</li><li><b>Issuer signature</b> verified on the chip</li></ul></div>
+        <div class="step" style="--accent:var(--navy)"><div class="num">SEALED</div><h3>Sealed on the phone, scored on the server.</h3><p>Encrypted to the server and signed by the attested key. The server re-derives every score from the raw signals.</p></div>
+        <div class="dots"></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ FRAUD PATH ============ -->
-  <section id="fraud">
+  <section id="fraud" class="alt">
     <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Fraud path · real run</span>
-        <h2>We filmed the card<br />off a laptop. <span class="hot">Caught.</span></h2>
-        <p class="lede">Same card, same phone, two runs. In the attack run, the moiré check alone would have missed it. The scene model saw a display, not a card, and fired before anything reached the server.</p>
+      <div class="head reveal">
+        <span class="eyebrow red">Fraud path · real run</span>
+        <h2>We filmed the card off a laptop. <span class="red">Caught.</span></h2>
+        <p class="lede">Same card, same phone. The moiré check alone missed it. The scene model saw a screen, not a card.</p>
       </div>
       <div class="fraud">
         <div class="reveal">
-          <div class="toggle" role="tablist">
-            <button class="on" data-mode="genuine">Genuine card</button>
-            <button data-mode="attack">Screen replay</button>
-          </div>
-          <div class="scene-model">
-            <h5>SCENE MODEL · WHAT THE CAMERA SEES</h5>
-            <div class="cls"><div class="row"><span>Physical card</span><span data-v="phys">0.64</span></div><div class="bar" style="--c:var(--green)"><i data-b="phys"></i></div></div>
-            <div class="cls"><div class="row"><span>Screen / display</span><span data-v="screen">0.00</span></div><div class="bar" style="--c:var(--red)"><i data-b="screen"></i></div></div>
-            <div class="cls"><div class="row"><span>Paper print</span><span data-v="paper">0.36</span></div><div class="bar" style="--c:var(--amber)"><i data-b="paper"></i></div></div>
-            <div class="row mono" style="font-size:13px;color:var(--muted)"><span>moiré</span><span data-v="moire">0.60 ≤ 4.0 · pass</span></div>
-            <div class="verdict ok" id="verdict">✓ No attack detected on the front</div>
-            <div class="rules">
-              <b>Rules</b> · physical &gt; 0.5 (+70) · moiré ≤ 4.0 (+60) · colourfulness (+45) · ID photo &lt; 0.70 (+70)<br />
-              <b>Other paths</b> · prints push the paper score, photocopies fail colourfulness, swapped portraits fail tampering
-            </div>
+          <div class="toggle"><button class="on" data-mode="genuine">Real card</button><button data-mode="attack">Screen replay</button></div>
+          <div class="model">
+            <h5>SCENE MODEL</h5>
+            <div class="row"><span>Physical card</span><span data-v="phys">0.64</span></div><div class="bar" style="--c:var(--green)"><i data-b="phys"></i></div>
+            <div class="row"><span>Screen</span><span data-v="screen">0.00</span></div><div class="bar" style="--c:var(--red)"><i data-b="screen"></i></div>
+            <div class="row"><span>Paper</span><span data-v="paper">0.36</span></div><div class="bar" style="--c:var(--orange)"><i data-b="paper"></i></div>
+            <div class="verdict ok" id="verdict">✓ No attack detected</div>
           </div>
         </div>
         <div class="twin reveal">
-          <div class="mini-phone" id="fraudA"><img src="assets/img/doc-front.jpg" alt="Genuine card in front of the camera" /></div>
-          <div class="mini-phone" id="fraudB"><img src="assets/img/pad-front.jpg" alt="Presentation-attack checks passing" /></div>
+          <div class="mini" id="fraudA"><img src="assets/img/doc-front.jpg" alt="Card in front of the camera" /></div>
+          <div class="mini" id="fraudB"><img src="assets/img/pad-front.jpg" alt="Attack checks result" /></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ FACE EXPLODED ============ -->
-  <section id="face" class="scrolly" data-scene="face" style="--len:800vh">
+  <section id="face" class="scene" data-rig="face" style="--len:700vh">
     <div class="sticky">
-      <div class="stage"><div class="rig" id="faceRig" data-rig="face"></div></div>
-      <div class="steps">
-        <div class="kicker">Face · exploded view</div>
-
-        <div class="step-card" data-step="0" style="--accent:var(--violet)">
-          <div class="num">ONE SELFIE</div>
-          <h3>Live. Matching. Unique.</h3>
-          <p>A selfie proves nothing on its own. Layer by layer, we ask whether it's a person, whether it's happening now, whether it's the document holder, and whether we've seen this face on another identity.</p>
-        </div>
-
-        <div class="step-card" data-step="1" style="--accent:var(--green)">
-          <div class="num">LAYER 1 · BELOW THE CAMERA</div>
-          <h3>The same attested phone.</h3>
-          <p>The front camera, the motion sensors and the StrongBox key that signs the challenge id. An injected virtual camera or a hooked stack has already cost points in the device step.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Challenge id signed on device</b><span>server consumes it exactly once</span></div></li>
-            <li><i class="ic">✓</i><div><b>External camera · hooks</b><span>virtual camera and Frida checks</span></div><em>+60</em></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="2" style="--accent:var(--sky)">
-          <div class="num">LAYER 2 · CAPTURE GATES</div>
-          <h3>A clean, frontal, neutral face.</h3>
-          <p>The neutral selfie is taken after three ready frames in a row.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Face · Centered · Distance</b><span>one face, inside the oval, at the right size</span></div></li>
-            <li><i class="ic">✓</i><div><b>Clear · Eyes · Light</b><span>background ≥ 50 · face ≥ 35 · spotlight &lt; 7</span></div></li>
-            <li><i class="ic">✓</i><div><b>Pose</b><span>look ≤ 0.5 · tilt ≤ 0.3</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="3" style="--accent:var(--violet)">
-          <div class="num">LAYER 3 · RANDOM CHALLENGE · PoH</div>
-          <h3>Moves nobody can pre-record.</h3>
-          <p>When the camera opens, the server draws 3 distinct actions, always including one head turn. A replayed clip can't know the order. Live face swaps, trained on frontal faces, lose tracking on the turn.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Issued at selfie time</b><span>valid 180 s · single use · 15 s per step</span></div></li>
-            <li><i class="ic">✓</i><div><b>Re-measured server side</b><span>yaw Δ ≥ 0.12 · roll Δ ≥ 6° · area ×1.15 / ×0.87</span></div></li>
-            <li><i class="ic">✓</i><div><b>Same face on every frame</b><span>SFace ≥ 0.4 across all action frames</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="4" style="--accent:var(--red)">
-          <div class="num">LAYER 4 · LIVENESS &amp; DEEPFAKES</div>
-          <h3>Is it a person, right now?</h3>
-          <p>Passive liveness runs on every frame with two MiniFASNet models. A tablet replay of a real face in the public Silent-Face samples matched the person at 0.59 but scored 0.002 on liveness.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>Passive liveness · MiniFASNet V2 + V1SE</b><span>pass ≥ 0.70 · fail &lt; 0.20</span></div></li>
-            <li><i class="ic">✓</i><div><b>Burst consistency</b><span>≥ 0.5 across the capture</span></div></li>
-            <li><i class="ic info">i</i><div><b>Face swap / deepfake service<span class="badge-mock">MOCK</span></b><span>stable /v1/analyze contract · WARN ≥ 0.35 · FAIL ≥ 0.75</span></div></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="5" style="--accent:var(--red)">
-          <div class="num">LAYER 5 · FACE ↔ DOCUMENT · 1:1</div>
-          <h3>Is it the holder? <span style="color:var(--red)">Not this time.</span></h3>
-          <p>The selfie is matched first against the chip's signed DG2 photo, then the printed portrait. In our recorded run, the selfie wasn't the card holder, and the Face step went red.</p>
-          <ul class="checks">
-            <li><i class="ic fail">✕</i><div><b>Selfie vs chip photo (DG2)</b><span>SFace 128-d cosine · match ≥ 0.363 · band ± 0.07</span></div></li>
-            <li><i class="ic">✓</i><div><b>Printed photo vs chip photo</b><span>catches a portrait swapped on a real card</span></div><em>+80</em></li>
-          </ul>
-        </div>
-
-        <div class="step-card" data-step="6" style="--accent:var(--green)">
-          <div class="num">LAYER 6 · UNIQUENESS · 1:N · PoU</div>
-          <h3>One face. How many identities?</h3>
-          <p>Every live selfie goes into a pgvector HNSW index. On real hardware, four onboarding attempts by the same person were linked into one face cluster.</p>
-          <ul class="checks">
-            <li><i class="ic">✓</i><div><b>1:N search</b><span>pgvector(128) · HNSW cosine · same person ≥ 0.5</span></div></li>
-            <li><i class="ic warn">!</i><div><b>Same face, other documents</b><span>cluster F-00001 · mules, synthetic IDs</span></div><em>+60</em></li>
-            <li><i class="ic warn">!</i><div><b>Document presented before</b><span>by a different face</span></div><em>+80</em></li>
-          </ul>
-        </div>
-
-        <div class="progress-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ TRIAGE GOD VIEW ============ -->
-  <section id="triage" class="god" data-scene="god">
-    <div class="sticky">
+      <div class="stage"><div class="origin"><div class="rig-el"></div></div></div>
       <div class="copy">
-        <span class="eyebrow blue">Triage console · god's-eye view</span>
-        <h2>Every signal. One decision.</h2>
+        <span class="eyebrow kicker">Face · taken apart</span>
+        <div class="step" style="--accent:var(--blue)"><div class="num">ONE SELFIE</div><h3>Live. Matching. Unique.</h3><p>Is it a person, is it happening now, is it the holder, and have we seen this face on another identity?</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">01 · DEVICE TRUST</div><h3>The same attested phone.</h3><p>The key that signs the challenge lives in StrongBox. A virtual camera already costs points.</p></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">02 · SELFIE</div><h3>A clean, frontal face.</h3><ul class="facts"><li><b>Face detection</b> (YuNet)</li><li><b>Centered, lit, eyes open</b></li><li><b>Passive liveness</b> on every frame</li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">03 · RANDOM CHALLENGE</div><h3>Moves nobody can pre-record.</h3><p>Three actions drawn by the server when the camera opens, always one head turn. Live face swaps lose tracking on the turn.</p></div>
+        <div class="step" style="--accent:var(--red)"><div class="num">04 · FACE ↔ DOCUMENT</div><h3>Is it the holder? <span class="red">Not this time.</span></h3><p>The selfie is matched against the chip's signed photo. In our recorded run it wasn't the card holder, and the face step went red.</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">05 · UNIQUENESS</div><h3>One face, how many identities?</h3><p>Every selfie is searched against all others. On real hardware, four attempts by one person were linked into one cluster.</p></div>
+        <div class="dots"></div>
       </div>
+    </div>
+  </section>
+
+  <section id="triage" class="god">
+    <div class="sticky">
+      <div class="copy"><span class="eyebrow">Triage console</span><h2>Every signal. One decision.</h2></div>
       <div class="console-rig" id="consoleRig">
         <div class="console">
           <div class="chrome"><i></i><i></i><i></i><div class="url">localhost:3000/triage?tab=high&amp;case=11007</div></div>
@@ -348,7 +140,6 @@
               <a href="#triage">Faces</a>
               <a href="#triage">Audit trail</a>
               <a href="#triage">Lab</a>
-              <div class="me"><i>L1</i><div><b style="color:#fff">Analyst</b><br />L1 Analyst</div></div>
             </aside>
             <div class="c-queue" data-hot="queue">
               <h5>Fraud triage queue (7)</h5>
@@ -414,109 +205,32 @@
           </div>
         </div>
       </div>
-      <div class="hotspot" data-for="queue"><i class="dotp"></i><div class="lab"><b>Risk-sorted queue</b>High, medium and low tabs. Demo fixtures are flagged so they never mix with real cases.</div></div>
-      <div class="hotspot" data-for="score"><i class="dotp"></i><div class="lab"><b>One server-side score</b>Rescored from raw signals. The phone's own score is only advisory.</div></div>
-      <div class="hotspot" data-for="face"><i class="dotp"></i><div class="lab"><b>Face 1:1 and 1:N</b>Selfie vs chip photo, passive liveness, and the face cluster across sessions.</div></div>
-      <div class="hotspot" data-for="ladder"><i class="dotp"></i><div class="lab"><b>The confidence path</b>Four steps, each with its confidence, weight and a one-line reason.</div></div>
-      <div class="hotspot" data-for="signals"><i class="dotp"></i><div class="lab"><b>Every raw signal</b>Grouped, capped and explained. Nothing is silently dropped.</div></div>
-      <div class="hotspot" data-for="rec"><i class="dotp"></i><div class="lab"><b>Why not approve? Why not reject?</b>A rule-based recommendation that argues both sides.</div></div>
-      <div class="hotspot" data-for="audit"><i class="dotp"></i><div class="lab"><b>Tamper-evident audit</b>SHA-256 hash chain. The table refuses UPDATE and DELETE.</div></div>
+      </div>
+      <div class="hotspot" data-for="queue"><i class="d"></i><div class="lab"><b>Risk-sorted queue</b>Demo cases are flagged so they never mix with real ones.</div></div>
+      <div class="hotspot" data-for="face"><i class="d"></i><div class="lab"><b>Face 1:1 and 1:N</b>Selfie vs chip photo, and the face cluster across sessions.</div></div>
+      <div class="hotspot" data-for="ladder"><i class="d"></i><div class="lab"><b>The four steps</b>Each with a confidence and a one-line reason.</div></div>
+      <div class="hotspot" data-for="rec"><i class="d"></i><div class="lab"><b>Why not approve? Why not reject?</b>A recommendation that argues both sides.</div></div>
     </div>
   </section>
 
-  <!-- ============ ATTACK MATRIX ============ -->
-  <section id="attacks">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">What it stops</span>
-        <h2>Eight attacks.<br /><span class="hot">Eight tripwires.</span></h2>
-      </div>
-      <div class="matrix">
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">01</div><h4>Chip downgrade</h4><p>A chipped card, but the attacker takes the photo-only path.</p><div class="by">Chip symbol detected on the card → NFC read required.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">02</div><h4>Screen, print, colour copy</h4><p>Someone else's card, replayed or printed.</p><div class="by">Scene model, moiré, colourfulness on the still.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">03</div><h4>Photo substitution</h4><p>An impostor's face on a genuine card.</p><div class="by">Printed portrait vs the chip's signed DG2.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">04</div><h4>Deepfake, swap, replay</h4><p>A face check passed without a live person.</p><div class="by">Random actions, same-face frames, passive liveness.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">05</div><h4>One face, many IDs</h4><p>Mules and synthetic identities.</p><div class="by">1:N clusters across sessions.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">06</div><h4>Emulator, root, hooks</h4><p>Everything above bypassed at the source.</p><div class="by">Hardware attestation + boot-state consistency.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">07</div><h4>Tampered payload</h4><p>Forged signals reach the backend.</p><div class="by">Sealed, signed, single-use challenge, rescored.</div></div>
-        <div class="atk reveal"><span class="stamp">BLOCKED</span><div class="n">08</div><h4>Oracle probing</h4><p>Retrying until the checks pass.</p><div class="by">The phone only learns a route. Never a reason.</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ ARCHITECTURE ============ -->
-  <section id="arch">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow blue">Architecture</span>
-        <h2>Open-source engines.<br /><span class="blue">One command</span> to run the lab.</h2>
-      </div>
-      <div class="arch">
-        <div class="node reveal"><div class="k">APPS/ANDROID</div><h4>Onboarding app</h4><ul><li>CameraX · ML Kit OCR</li><li>OpenCV · JMRTD</li><li>Key attestation</li><li>Sealed envelope</li></ul></div>
-        <div class="node reveal"><div class="k">SUPABASE/FUNCTIONS</div><h4>Attest API</h4><ul><li>Deno edge function</li><li>Verifies the chain</li><li>Confidence ladder</li><li>Routes, no oracle</li></ul></div>
-        <div class="node reveal"><div class="k">SERVICES/FACE</div><h4>Face engine</h4><ul><li>YuNet · SFace</li><li>MiniFASNet ×2</li><li>OpenCV DNN, no torch</li><li>1:1 · 1:N</li></ul></div>
-        <div class="node reveal"><div class="k">SUPABASE/MIGRATIONS</div><h4>Postgres</h4><ul><li>pgvector HNSW</li><li>Private schemas</li><li>Hash-chained audit</li><li>Private image bucket</li></ul></div>
-        <div class="node reveal"><div class="k">APPS/ADMIN</div><h4>Triage console</h4><ul><li>Next.js</li><li>Queue · case · faces</li><li>Recommendation</li><li>Analyst decisions</li></ul></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ HONEST ============ -->
-  <section id="honest">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow green">How it was validated</span>
-        <h2>Real hardware.<br /><span class="ok">Honest limits.</span></h2>
-      </div>
-      <div class="honest">
-        <div class="col reveal"><h4 style="color:var(--green)">Validated</h4><ul>
-          <li>End-to-end sessions on a Pixel 6: 4-certificate StrongBox chain verified, unlocked bootloader reported, root caught despite hidden Magisk.</li>
-          <li>Four onboarding attempts by the same person linked into one face cluster.</li>
-          <li>Screen replay of a real card caught on device by the scene model.</li>
-          <li>Tablet replay on the public Silent-Face samples: face match 0.59, liveness 0.002.</li>
-          <li>API tests: six attack scenarios routed, audit-chain tamper detection, 1:N linking.</li>
-        </ul></div>
-        <div class="col reveal"><h4 style="color:var(--amber)">Next</h4><ul>
-          <li>Face-swap / deepfake service is a mock behind a stable contract. It needs a real detector.</li>
-          <li>The document agent is a stub. It has no online lookups yet.</li>
-          <li>Play Integrity tokens are requested but not yet verified server side.</li>
-          <li>Swiss CSCA chaining, Google root pinning and revocation checks are still to do.</li>
-          <li>Every risk weight is hand-set. Labelled sessions would let us fit them to a target APCER / BPCER.</li>
-        </ul></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ FILM ============ -->
   <section id="film">
     <div class="wrap">
-      <div class="section-head center reveal">
-        <span class="eyebrow">The demo film</span>
-        <h2>Watch it catch <span class="hot">itself.</span></h2>
-        <p class="lede">Real footage from our Pixel 6. Our own rooted test phone was caught, and the fraudster only ever sees "You're all set".</p>
-      </div>
-      <div class="film reveal">
-        <video id="filmVideo" controls playsinline preload="none" poster="assets/img/og.jpg">
-          <source src="assets/video/donotfraud-demo.mp4" type="video/mp4" />
-        </video>
-      </div>
+      <div class="head center reveal"><span class="eyebrow">The film</span><h2>Watch it catch <span class="red">itself.</span></h2></div>
+      <div class="film reveal"><video id="filmVideo" controls playsinline preload="none" poster="assets/img/og.jpg"><source src="assets/video/donotfraud-demo.mp4" type="video/mp4" /></video></div>
     </div>
   </section>
 
   <footer>
     <div class="wrap">
-      <div>
-        <a class="brand" href="#top"><img src="assets/img/shield.svg" alt="" /><span>DoNotFraud<b>AI</b></span></a>
-        <small>Neutralizing AI Fraud Era Threats · Zürich Hackathon 2026 · ID images on this page are pixelated.</small>
-      </div>
+      <div><a class="brand" href="#top"><img src="assets/img/shield.svg" alt="" /><span>DoNotFraud<b>AI</b></span></a><small>Neutralizing AI Fraud Era Threats · Zürich Hackathon 2026 · ID images are pixelated.</small></div>
       <div class="links">
-        <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener">GitHub repository</a>
-        <a class="btn" data-link="readme" href="#" target="_blank" rel="noopener">README</a>
+        <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
+        <a class="btn" href="slides.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Pitch slides</a>
         <a class="btn primary" data-link="slides" href="#" target="_blank" rel="noopener">Slide deck</a>
       </div>
     </div>
   </footer>
 
-  <script src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

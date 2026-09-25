@@ -1,0 +1,22 @@
+{
+  "name": "donotfraud-pitch-clips",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renders the showcase pitch slides (site/assets/js/slides-core.js) to MP4 + PNG for Canva",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-assets.mjs",
+    "start": "npm run sync && remotion studio src/root.tsx",
+    "render": "npm run sync && node scripts/render-all.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.280",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.280"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "typescript": "^5.7.3"
+  }
+}
