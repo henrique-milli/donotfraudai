@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- one deliberate light theme: the app never follows system dark mode -->
+    <style name="Theme.Attest" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/at_paper</item>
+        <item name="android:statusBarColor">@color/at_paper</item>
+        <item name="android:navigationBarColor">@color/at_paper</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="colorPrimary">@color/at_ink</item>
+        <item name="colorPrimaryDark">@color/at_paper</item>
+        <item name="colorAccent">@color/at_ink</item>
+        <item name="android:textColorPrimary">@color/at_ink</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Theme.Attest.Night" parent="Theme.Attest">
+        <item name="android:windowBackground">@color/at_night</item>
+        <item name="android:statusBarColor">@color/at_night</item>
+        <item name="android:navigationBarColor">@color/at_night</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <!-- type scale -->
+    <style name="at_display">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/at_ink</item>
+        <item name="android:textSize">34sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingMultiplier">1.05</item>
+    </style>
+    <style name="at_title">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/at_ink</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+    <style name="at_heading">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/at_ink</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="at_body">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/at_ink_2</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+    </style>
+    <style name="at_small">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/at_ink_2</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineSpacingMultiplier">1.25</item>
+    </style>
+    <style name="at_label">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/at_ink_3</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.14</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="at_mono">
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">@color/at_ink_2</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="at_button_primary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/at_button_h</item>
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/at_on_ink</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+    <style name="at_button_secondary" parent="at_button_primary">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:textColor">@color/at_ink</item>
+    </style>
+    <style name="at_button_text" parent="at_button_primary">
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:textColor">@color/at_ink_2</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+</resources>

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false
+  },
+  "imports": {},
+  "tasks": {
+    "serve": "deno run --allow-net --allow-env --allow-read index.ts",
+    "keygen": "deno run --allow-env tools/keygen.ts",
+    "seed-demo": "deno run --allow-net --allow-env --allow-read tools/seed_demo.ts",
+    "verify-audit": "deno run --allow-net --allow-env --allow-read tools/verify_audit.ts",
+    "rebuild-face-clusters": "deno run --allow-net --allow-env --allow-read tools/rebuild_face_clusters.ts",
+    "test": "deno test --allow-net --allow-env --allow-read tests/"
+  }
+}

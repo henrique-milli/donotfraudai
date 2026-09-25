@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+
+    <!-- device risk profile: known root / hooking / remote-control / cloner apps (DeviceProfile.RISK_APPS) -->
+    <queries>
+        <!-- launcher apps: finds root managers renamed to random package names (e.g. hidden Magisk) -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <package android:name="tech.httptoolkit.android.v1" />
+        <package android:name="com.guoshi.httpcanary" />
+        <package android:name="app.greyshirts.sslcapture" />
+        <package android:name="com.emanuelef.remote_capture" />
+        <package android:name="pl.nextcamera" />
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="io.github.huskydg.magisk" />
+        <package android:name="io.github.vvb2060.magisk" />
+        <package android:name="me.weishu.kernelsu" />
+        <package android:name="eu.chainfire.supersu" />
+        <package android:name="org.lsposed.manager" />
+        <package android:name="de.robv.android.xposed.installer" />
+        <package android:name="org.meowcat.edxposed.manager" />
+        <package android:name="com.saurik.substrate" />
+        <package android:name="com.anydesk.anydeskandroid" />
+        <package android:name="com.teamviewer.quicksupport.market" />
+        <package android:name="com.teamviewer.teamviewer.market.mobile" />
+        <package android:name="com.rustdesk.rustdesk" />
+        <package android:name="com.lbe.parallel.intl" />
+        <package android:name="com.excelliance.dualaid" />
+        <package android:name="com.vmos.pro" />
+    </queries>
+
+    <application
+        android:name=".AttestApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:theme="@style/Theme.Attest">
+
+        <activity
+            android:name=".ui.HomeActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.ScanActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Attest.Night" />
+
+        <activity
+            android:name=".ui.SelfieActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Attest.Night" />
+
+        <activity
+            android:name=".ui.NfcActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.ResultActivity"
+            android:screenOrientation="portrait" />
+    </application>
+</manifest>

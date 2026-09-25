@@ -1,0 +1,29 @@
+buildscript {
+    ext.kotlin_version = '1.8.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.11.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+// scan engine AARs come from a Maven folder on the build machine
+def engineRepo = findProperty('engineRepo') ?: "file://${System.getProperty('user.home')}/.attest-engine"
+if (!engineRepo.startsWith('file:')) {
+    throw new GradleException("engineRepo must be a file:// folder, not ${engineRepo}")
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            name = 'engine'
+            url = engineRepo
+            content { includeGroup 'ch.digitaltrust.engine'; includeModule 'com.romandanylyk', 'pageindicatorview'; includeModule 'org.opencv', 'opencv-android' }
+        }
+    }
+}

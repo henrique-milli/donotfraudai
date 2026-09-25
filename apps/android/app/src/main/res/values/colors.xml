@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Attest design tokens: Swiss-style neutral ink on paper, colour only where it means something -->
+    <color name="at_paper">#FFFFFF</color>
+    <color name="at_surface">#F3F3F0</color>
+    <color name="at_surface_2">#EAEAE6</color>
+    <color name="at_hairline">#E2E2DD</color>
+    <color name="at_ink">#111112</color>
+    <color name="at_ink_2">#5B5E66</color>
+    <color name="at_ink_3">#9A9CA3</color>
+    <color name="at_on_ink">#FFFFFF</color>
+
+    <color name="at_pass">#0B8A5B</color>
+    <color name="at_pass_bg">#E4F4EC</color>
+    <color name="at_warn">#B86E00</color>
+    <color name="at_warn_bg">#FBF0DC</color>
+    <color name="at_fail">#D7261B</color>
+    <color name="at_fail_bg">#FCE6E3</color>
+    <color name="at_info">#6D7078</color>
+    <color name="at_signal">#D7261B</color>
+
+    <!-- camera -->
+    <color name="at_night">#0B0B0C</color>
+    <color name="at_scrim">#B30B0B0C</color>
+    <color name="at_hud">#E6141416</color>
+    <color name="at_on_night_2">#B3FFFFFF</color>
+    <color name="at_on_night_3">#66FFFFFF</color>
+</resources>

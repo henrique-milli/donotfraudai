@@ -1,0 +1,18 @@
+[project]
+name = "donotfraud-face"
+version = "0.1.0"
+description = "Open-source face service: detection, embeddings, passive liveness, 1:1 verify, 1:N gallery (pgvector)."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "opencv-python-headless>=4.9,<4.12",
+  "numpy<2.1",
+  "psycopg[binary]>=3.1",  # only used with a Postgres/pgvector gallery (Supabase)
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

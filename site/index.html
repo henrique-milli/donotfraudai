@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DoNotFraudAI · Neutralizing AI Fraud Era Threats</title>
+  <meta name="description" content="Identity onboarding that proves a real phone, a real document, a live human and a unique person." />
+  <meta property="og:title" content="DoNotFraudAI · Neutralizing AI Fraud Era Threats" />
+  <meta property="og:description" content="Proof of Human and Proof of Uniqueness for digital onboarding. Zürich Hackathon 2026." />
+  <meta property="og:image" content="assets/img/og.jpg" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="assets/img/shield.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/site.css" />
+  <link rel="stylesheet" href="assets/css/explode.css" />
+  <link rel="stylesheet" href="assets/css/console.css" />
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a class="brand" href="#top"><img src="assets/img/shield.svg" alt="" /><span>DoNotFraud<b>AI</b></span></a>
+    <div class="links">
+      <a href="#path">How it works</a>
+      <a href="#document">Document</a>
+      <a href="#face">Face</a>
+      <a href="#triage">Triage</a>
+      <a href="slides.html">Slides</a>
+    </div>
+    <div class="cta">
+      <a class="btn sm" data-link="slides" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Deck</a>
+      <a class="btn sm primary" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Zürich Hackathon 2026</span>
+        <h1>Make every fraud attempt cost a <span style="color:var(--light-blue)">new human.</span></h1>
+        <p class="lede">AI lets one fraudster be a thousand people. We check a real phone, a real document, a live human and a face that hasn't onboarded before. Proof of Human, Proof of Uniqueness.</p>
+        <div class="actions">
+          <a class="btn primary" href="#document">See how it works</a>
+          <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Source</a>
+          <a class="btn" href="slides.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Pitch slides</a>
+        </div>
+      </div>
+      <div class="hero-art"><div class="origin"><div id="heroRig"></div></div></div>
+    </div>
+  </header>
+
+  <section id="path" class="alt">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2>What happens between <span class="blue">Start</span> and <span class="blue">You're all set</span>.</h2>
+        <p class="lede">About a minute for the applicant. The phone collects and seals the evidence, our server scores it once and picks a route. The applicant never sees the score.</p>
+      </div>
+      <ol class="flow reveal">
+        <li><figure class="thumb"><img src="assets/img/start.jpg" alt="" /></figure><span class="k">01 · weight 20%</span><b>The phone</b><p>Hardware key attestation, boot state, root and hooks.</p></li>
+        <li><figure class="thumb"><img src="assets/img/doc-front.jpg" alt="" /></figure><span class="k">02 · weight 25%</span><b>The card</b><p>Capture checks, authenticity, MRZ check digits.</p></li>
+        <li><figure class="thumb"><img src="assets/img/chip.jpg" alt="" /></figure><span class="k">03 · weight 30%</span><b>The chip</b><p>Must match the print and carry the issuer's signature.</p></li>
+        <li><figure class="thumb"><img src="assets/img/face.jpg" alt="" /></figure><span class="k">04 · weight 25%</span><b>The face</b><p>Random challenge, 1:1 with the chip photo, 1:N across sessions.</p></li>
+      </ol>
+      <div class="scale reveal">
+        <div class="scale-head"><b>Risk score</b><span>0 is clean, 100 is stop</span></div>
+        <div class="scale-bar">
+          <span style="flex:25">Continue<small>under 25 · auto-approve</small></span>
+          <span style="flex:35">Manual review<small>25 to 59 · an analyst decides</small></span>
+          <span style="flex:40">Branch visit<small>60 and up · invited in, never auto-rejected</small></span>
+          <i class="marker"><em>Our rooted test phone scored 100</em></i>
+        </div>
+        <div class="scale-ticks"><span>0</span><span style="left:25%">25</span><span style="left:60%">60</span><span style="left:100%">100</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="document" class="scene" data-rig="doc" style="--len:780vh">
+    <div class="sticky">
+      <div class="stage"><div class="origin"><div class="rig-el"></div></div></div>
+      <div class="copy">
+        <span class="eyebrow kicker">Document · taken apart</span>
+        <div class="step" style="--accent:var(--blue)"><div class="num">ONE PHOTO</div><h3>Five layers check every frame.</h3><p>Scroll to take the phone apart. Each layer comes forward so you can read it.</p></div>
+        <div class="step" style="--accent:var(--light-blue);--check:var(--light-blue)"><div class="num">01 · DEVICE TRUST</div><h3>Is this a real phone?</h3><p>We check the hardware before trusting a pixel.</p><ul class="facts"><li><b>Hardware key attestation</b>, bound to our challenge</li><li><b>Boot state</b> vs attested boot catches hidden root</li><li><b>Emulators, hooks, virtual cameras</b></li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">02 · CAMERA</div><h3>The raw frame.</h3><p>Real footage from our Pixel 6. The still is only taken after two good frames in a row.</p></div>
+        <div class="step" style="--accent:var(--light-green);--head:var(--light-green);--check:var(--light-green)"><div class="num">03 · CAPTURE CHECKS</div><h3>A usable photo, live.</h3><ul class="facts"><li><b>Card</b> detected and filling the frame</li><li><b>Sharp</b> and well lit</li><li><b>Portrait or MRZ</b> readable</li></ul></div>
+        <div class="step" style="--accent:var(--light-blue);--head:var(--light-blue);--check:var(--light-blue)"><div class="num">04 · AUTHENTICITY</div><h3>Genuine, not a copy.</h3><p>Independent checks on the full-resolution still. If one misses, another catches it.</p><ul class="facts"><li><b>Several checks</b>, not one</li><li><b>Re-scored</b> on the server</li><li><b>Never shown</b> to the applicant</li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">05 · MRZ + CHIP</div><h3>Read it, then prove it.</h3><ul class="facts"><li><b>MRZ</b> check digits must be valid</li><li><b>Chip data</b> must match the print</li><li><b>Issuer signature</b> verified on the chip</li></ul></div>
+        <div class="step" style="--accent:var(--light-blue);--head:var(--light-blue)"><div class="num">SEALED</div><h3>Sealed on the phone, scored on the server.</h3><p>Encrypted to the server and signed by the attested key. The server re-derives every score from the raw signals.</p></div>
+        <div class="dots"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="face" class="scene" data-rig="face" style="--len:700vh">
+    <div class="sticky">
+      <div class="stage"><div class="origin"><div class="rig-el"></div></div></div>
+      <div class="copy">
+        <span class="eyebrow kicker">Face · taken apart</span>
+        <div class="step" style="--accent:var(--blue)"><div class="num">ONE SELFIE</div><h3>Live. Matching. Unique.</h3><p>Is it a person, is it happening now, is it the holder, and have we seen this face on another identity?</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">01 · DEVICE TRUST</div><h3>The same attested phone.</h3><p>The key that signs the challenge lives in StrongBox. A virtual camera already costs points.</p></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">02 · SELFIE</div><h3>A clean, frontal face.</h3><ul class="facts"><li><b>Face detection</b> (YuNet)</li><li><b>Centered, lit, eyes open</b></li><li><b>Passive liveness</b> on every frame</li></ul></div>
+        <div class="step" style="--accent:var(--blue)"><div class="num">03 · RANDOM CHALLENGE</div><h3>Moves nobody can pre-record.</h3><p>Three actions drawn by the server when the camera opens, always one head turn. Live face swaps lose tracking on the turn.</p></div>
+        <div class="step" style="--accent:var(--light-blue)"><div class="num">04 · FACE ↔ DOCUMENT</div><h3>Is it the holder? <span class="red">Not this time.</span></h3><p>The selfie is matched against the chip's signed photo. In our recorded run it wasn't the card holder, so the face step failed.</p></div>
+        <div class="step" style="--accent:var(--green)"><div class="num">05 · UNIQUENESS</div><h3>One face, how many identities?</h3><p>Every selfie is searched against all others. On real hardware, four attempts by one person were linked into one cluster.</p></div>
+        <div class="dots"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="triage" class="god">
+    <div class="sticky">
+      <div class="copy"><span class="eyebrow">Triage console</span><h2>Every signal. One decision.</h2></div>
+      <div class="console-rig" id="consoleRig">
+        <div class="console">
+          <div class="chrome"><i></i><i></i><i></i><div class="url">localhost:3000/triage?tab=high&amp;case=11007</div></div>
+          <div class="app">
+            <aside class="c-side">
+              <div class="b"><i></i>Attest</div>
+              <a class="on" href="#triage">Triage <u>7</u></a>
+              <a href="#triage">Faces</a>
+              <a href="#triage">Audit trail</a>
+              <a href="#triage">Lab</a>
+            </aside>
+            <div class="c-queue" data-hot="queue">
+              <h5>Fraud triage queue (7)</h5>
+              <div class="search">Search name, document, case or session…</div>
+              <div class="c-tabs"><span>All</span><span class="on">High</span><span>Medium</span><span>Low</span></div>
+              <div class="c-row on"><div class="t">#11007 <span class="rp h">High</span></div><div class="m">just now · open · Pixel 6 · real session</div></div>
+              <div class="c-row"><div class="t">#11002 <span class="rp h">High</span></div><div class="m">demo · Fake document · Lukas Beispiel</div></div>
+              <div class="c-row"><div class="t">#11004 <span class="rp h">High</span></div><div class="m">demo · Emulator, injected camera · Marc Exemple</div></div>
+              <div class="c-row"><div class="t">#11006 <span class="rp h">High</span></div><div class="m">demo · Altered document · Tom Modell</div></div>
+              <div class="c-row"><div class="t">#11003 <span class="rp m">Medium</span></div><div class="m">demo · Chip downgrade attempt · Sofia Esempio</div></div>
+              <div class="c-row"><div class="t">#11005 <span class="rp m">Medium</span></div><div class="m">demo · Rooted phone, legacy card · Nina Prova</div></div>
+              <div class="c-row"><div class="t">#11001 <span class="rp l">Low</span></div><div class="m">demo · Clean chip read · Anna Muster</div></div>
+            </div>
+            <main class="c-main">
+              <div class="c-card"><div class="c-head"><h4>Case #11007</h4><span class="rp h">High risk</span><span style="margin-left:auto;color:#6b7280">Swiss residence permit · session 160970CC</span></div></div>
+              <div class="c-grid2">
+                <div class="c-card" data-hot="score"><h6>Fraud risk assessment</h6>
+                  <div class="c-gauge">
+                    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#eef0f4" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#dc2f25" stroke-width="10" stroke-dasharray="251 251" transform="rotate(-90 50 50)"/><text x="50" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#111827">100</text></svg>
+                    <div><b style="font-size:14px">Route · BRANCH_VISIT</b><br /><span style="color:#6b7280">80 signals · 52 passed · 6 fired</span><br /><span style="color:#6b7280">phone's own score: advisory</span></div>
+                  </div>
+                </div>
+                <div class="c-card" data-hot="face"><h6>Face verification · YuNet · SFace · MiniFASNet</h6>
+                  <div class="c-face">
+                    <div class="ph" style="background-image:url(assets/img/face.jpg);background-position:50% 30%;background-size:180%"></div>
+                    <div class="ph blur" style="background:#cbd2dc"></div>
+                    <div><b style="color:#dc2f25">No match</b> · similarity below 36%<br /><span style="color:#6b7280">Passive liveness ✓ · 1:N cluster F-00001</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="c-card" data-hot="ladder"><h6>Confidence path</h6>
+                <div class="c-steps">
+                  <div class="f"><b>Device</b>root hidden · boot spoofed</div>
+                  <div class="p"><b>Document</b>authentic · MRZ ✓</div>
+                  <div class="p"><b>Chip</b>ICAO 9303 · signature ✓</div>
+                  <div class="f"><b>Face</b>1:1 vs DG2 · no match</div>
+                </div>
+              </div>
+              <div class="c-card" data-hot="signals"><h6>Raw signals</h6>
+                <div class="c-sig">
+                  <div><span>Document authenticity</span><span style="color:#0f9960">passed</span></div>
+                  <div><span>Face verification</span><span style="color:#dc2f25">1 fired</span></div>
+                  <div><span>Chip · ICAO 9303</span><span style="color:#0f9960">7/7 passed</span></div>
+                  <div><span>Device integrity</span><span style="color:#dc2f25">10/15 · +cap 50</span></div>
+                  <div><span>Cross-checks</span><span style="color:#c27400">document expired</span></div>
+                  <div><span>Capture quality</span><span style="color:#0f9960">passed</span></div>
+                </div>
+              </div>
+            </main>
+            <aside class="c-right">
+              <div class="c-card" data-hot="rec"><h6>✦ Assessment summary</h6>
+                <div class="c-rec"><b>Invite to branch</b><br /><span style="color:#4b5563">Hidden root, a face that doesn't match the chip photo, and an expired document.</span></div>
+                <div class="c-why" style="margin-top:8px"><div><b>Not approving because</b><br />device can't be trusted · face ≠ DG2</div><div><b>Not rejecting because</b><br />chip genuine · card authentic · appealable</div></div>
+              </div>
+              <div class="c-card" data-hot="decide"><h6>Analyst decision</h6>
+                <div class="search" style="height:40px;margin-bottom:8px;align-items:flex-start;padding-top:6px">Note for the audit trail…</div>
+                <div class="c-btns"><span class="ap">✓ Approve</span><span>↻ Request verification</span><span>⚠ Escalate</span><span class="rj">✕ Reject</span></div>
+              </div>
+              <div class="c-card" data-hot="audit"><h6>Audit trail · hash-chained</h6>
+                <div class="c-audit"><div><span>✓ chain intact</span> · 14 events verified</div><div>#14 decision · 9f2c…e1a0</div><div>#13 scored · 41b7…c2d9</div><div>#12 ingested · 0a93…77f4</div></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="hotspot" data-for="queue"><i class="d"></i><div class="lab"><b>Risk-sorted queue</b>Demo cases are flagged so they never mix with real ones.</div></div>
+      <div class="hotspot" data-for="face"><i class="d"></i><div class="lab"><b>Face 1:1 and 1:N</b>Selfie vs chip photo, and the face cluster across sessions.</div></div>
+      <div class="hotspot" data-for="ladder"><i class="d"></i><div class="lab"><b>The four steps</b>Each with a confidence and a one-line reason.</div></div>
+      <div class="hotspot" data-for="rec"><i class="d"></i><div class="lab"><b>Why not approve? Why not reject?</b>A recommendation that argues both sides.</div></div>
+    </div>
+  </section>
+
+  <section id="film">
+    <div class="wrap">
+      <div class="head center reveal"><span class="eyebrow">The film</span><h2>Watch it catch <span class="red">itself.</span></h2></div>
+      <div class="film reveal"><video id="filmVideo" controls playsinline preload="none" poster="assets/img/film-poster.jpg"><source src="assets/video/donotfraud-demo.mp4" type="video/mp4" /></video></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div><a class="brand" href="#top"><img src="assets/img/shield.svg" alt="" /><span>DoNotFraud<b>AI</b></span></a><small>Neutralizing AI Fraud Era Threats · Zürich Hackathon 2026 · ID images are pixelated.</small></div>
+      <div class="links">
+        <a class="btn" data-link="repo" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
+        <a class="btn" href="slides.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Pitch slides</a>
+        <a class="btn primary" data-link="slides" href="#" target="_blank" rel="noopener">Slide deck</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

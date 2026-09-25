@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- debug builds only: plain HTTP to the local attest-backend container (USB adb reverse or Mac LAN IP).
+     Release builds use src/main's config: TLS only. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

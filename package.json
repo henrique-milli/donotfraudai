@@ -1,0 +1,31 @@
+{
+  "name": "donotfraudai",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Z\u00fcrich Hackathon 2026 \u2014 fraud-resistant, frictionless identity onboarding.",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "lan": "node scripts/write-env.mjs",
+    "dev": "node scripts/dev.mjs",
+    "phone:usb": "node scripts/adb-reverse.mjs",
+    "face:models": "node scripts/face-models.mjs",
+    "attest:test": "bash supabase/functions/attest/tests/run.sh",
+    "attest:seed": "cd supabase/functions/attest && DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres} deno run --env-file=../.env -A tools/seed_demo.ts",
+    "attest:serve": "supabase functions serve --env-file supabase/functions/.env",
+    "android:key": "sh apps/android/scripts/fetch-backend-key.sh",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:studio": "node -e \"import('node:child_process').then(c=>c.execSync('xdg-open http://localhost:54323',{stdio:'ignore'}))\"",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "supabase": "^2.84.4",
+    "turbo": "^2.5.8"
+  }
+}
